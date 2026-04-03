@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  password      String
+  name          String
+  phone         String?
+  role          String          @default("OWNER") // SUPERADMIN, OWNER
+  verified      Boolean         @default(false)
+  avatarUrl     String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  boardingHouses BoardingHouse[]
+  subscription  Subscription?
+  notifications Notification[]
+
+  @@index([role, verified])
+}
+
+model BoardingHouse {
+  id              String    @id @default(cuid())
+  name            String
+  address         String
+  city            String    @default("Mati City")
+  description     String?
+  type            String    @default("MIXED") // ALL_FEMALE, ALL_MALE, MIXED
+  latitude        Float?
+  longitude       Float?
+  coverImage      String?
+  verified        Boolean   @default(false)
+  published       Boolean   @default(false)
+  hasCurfew       Boolean   @default(false)
+  curfewTime      String?
+  restrictions    String?
+  amenities       String?
+  contactPhone    String?
+  contactEmail    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  ownerId         String
+  owner           User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rooms           Room[]
+  tenants         Tenant[]
+  invoices        Invoice[]
+  bills           Bill[]
+
+  @@index([ownerId])
+  @@index([city, type, published])
+}
+
+model Room {
+  id                  String   @id @default(cuid())
+  number              String
+  floor               Int      @default(1)
+  capacity            Int      @default(1)
+  monthlyRate         Float
+  electricityIncluded Boolean  @default(false)
+  hasAircon           Boolean  @default(false)
+  hasWifi             Boolean  @default(false)
+  hasBathroom         Boolean  @default(false)
+  amenities           String?
+  status              String   @default("AVAILABLE") // AVAILABLE, OCCUPIED, MAINTENANCE
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  boardingHouseId     String
+  boardingHouse       BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+  tenants             Tenant[]
+  transfers           RoomTransfer[]
+  targetTransfers     RoomTransfer[] @relation("TargetRoom")
+
+  @@index([boardingHouseId, status])
+}
+
+model Tenant {
+  id              String    @id @default(cuid())
+  name            String
+  email           String?
+  phone           String
+  emergencyContact String?
+  moveInDate      DateTime
+  moveOutDate     DateTime?
+  status          String    @default("ACTIVE") // ACTIVE, INACTIVE, PENDING
+  avatarUrl       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  roomId          String?
+  room            Room?     @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+  invoices        Invoice[]
+  bills           Bill[]
+  transfers       RoomTransfer[]
+
+  @@index([boardingHouseId, status])
+  @@index([roomId])
+}
+
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique
+  amount          Float
+  dueDate         DateTime
+  paidDate        DateTime?
+  status          String   @default("PENDING") // PENDING, PAID, OVERDUE, CANCELLED
+  type            String   @default("RENT") // RENT, ELECTRICITY, WATER, OTHER
+  description     String?
+  sentVia         String?
+  sentAt          DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+
+  @@index([boardingHouseId, status])
+  @@index([tenantId])
+  @@index([dueDate])
+}
+
+model Bill {
+  id              String   @id @default(cuid())
+  type            String
+  amount          Float
+  period          String
+  currentReading  Float?
+  previousReading Float?
+  ratePerUnit     Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+
+  @@index([boardingHouseId, period])
+  @@index([tenantId])
+}
+
+model RoomTransfer {
+  id           String   @id @default(cuid())
+  reason       String?
+  status       String   @default("PENDING") // PENDING, APPROVED, COMPLETED, CANCELLED
+  transferDate DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fromRoomId   String
+  fromRoom     Room     @relation(fields: [fromRoomId], references: [id], onDelete: Cascade)
+  toRoomId     String
+  toRoom       Room     @relation("TargetRoom", fields: [toRoomId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([fromRoomId])
+  @@index([toRoomId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("INFO")
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  plan        String   @default("STARTER")
+  maxRooms    Int      @default(10)
+  maxTenants  Int      @default(15)
+  emailSms    Boolean  @default(false)
+  analytics   Boolean  @default(false)
+  amount      Float    @default(0)
+  status      String   @default("ACTIVE")
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
