@@ -109,17 +109,28 @@ function getTransport() {
   });
 }
 
+export type EmailTransport = {
+  sendMail(options: {
+    from: string;
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+  }): Promise<{ messageId: string }>;
+};
+
 export async function sendInvoiceEmail(
   to: string,
-  data: InvoiceEmailData
+  data: InvoiceEmailData,
+  transport?: EmailTransport
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   if (!validateEmailRecipient(to)) {
     return { success: false, error: "Invalid recipient email" };
   }
 
   try {
-    const transport = getTransport();
-    const info = await transport.sendMail({
+    const mailer = transport || getTransport();
+    const info = await mailer.sendMail({
       from: process.env.SMTP_FROM || '"Phase" <noreply@phase.app>',
       to,
       subject: `Invoice ${data.invoiceNumber} — ${formatCurrency(data.amount)} due ${formatDate(data.dueDate)}`,

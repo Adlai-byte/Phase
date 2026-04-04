@@ -81,15 +81,22 @@ export async function updateTenant(input: z.infer<typeof updateTenantSchema>) {
 
   const { id, ...data } = parsed.data;
 
-  // If setting inactive, free the room
+  // If setting inactive, free the room and unlink tenant
   if (data.status === "INACTIVE") {
-    const current = await prisma.tenant.findUnique({ where: { id } });
-    if (current?.roomId) {
-      await prisma.room.update({
-        where: { id: current.roomId },
-        data: { status: "AVAILABLE" },
+    const tenant = await prisma.$transaction(async (tx) => {
+      const current = await tx.tenant.findUnique({ where: { id } });
+      if (current?.roomId) {
+        await tx.room.update({
+          where: { id: current.roomId },
+          data: { status: "AVAILABLE" },
+        });
+      }
+      return tx.tenant.update({
+        where: { id },
+        data: { ...data, roomId: null, moveOutDate: new Date() },
       });
-    }
+    });
+    return { success: true as const, tenant };
   }
 
   const tenant = await prisma.tenant.update({ where: { id }, data });
@@ -102,14 +109,16 @@ export async function assignTenantToRoom(tenantId: string, roomId: string) {
     return { success: false as const, error: "Room is not available for assignment" };
   }
 
-  const tenant = await prisma.tenant.update({
-    where: { id: tenantId },
-    data: { roomId },
-  });
-
-  await prisma.room.update({
-    where: { id: roomId },
-    data: { status: "OCCUPIED" },
+  const tenant = await prisma.$transaction(async (tx) => {
+    const updated = await tx.tenant.update({
+      where: { id: tenantId },
+      data: { roomId },
+    });
+    await tx.room.update({
+      where: { id: roomId },
+      data: { status: "OCCUPIED" },
+    });
+    return updated;
   });
 
   return { success: true as const, tenant };

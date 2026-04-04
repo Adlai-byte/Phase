@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { buildInvoiceEmailHtml, buildInvoiceEmailText, validateEmailRecipient } from "./email";
+import { describe, it, expect, vi } from "vitest";
+import { buildInvoiceEmailHtml, buildInvoiceEmailText, validateEmailRecipient, sendInvoiceEmail, type EmailTransport } from "./email";
 
 describe("Email Service", () => {
   const invoiceData = {
@@ -78,6 +78,63 @@ describe("Email Service", () => {
       expect(text).toContain("Maria Santos");
       expect(text).toContain("3,500");
       expect(text).toContain("Casa Marina");
+    });
+  });
+
+  describe("sendInvoiceEmail", () => {
+    const mockTransport: EmailTransport = {
+      sendMail: vi.fn().mockResolvedValue({ messageId: "mock-msg-123" }),
+    };
+
+    it("sends email via transport and returns messageId", async () => {
+      const result = await sendInvoiceEmail("maria@email.com", invoiceData, mockTransport);
+      expect(result.success).toBe(true);
+      expect(result.messageId).toBe("mock-msg-123");
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "maria@email.com",
+          subject: expect.stringContaining("PH-2604-A1B2"),
+        })
+      );
+    });
+
+    it("includes HTML and text versions", async () => {
+      await sendInvoiceEmail("maria@email.com", invoiceData, mockTransport);
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          html: expect.stringContaining("#004d64"),
+          text: expect.stringContaining("Maria Santos"),
+        })
+      );
+    });
+
+    it("rejects invalid email recipient", async () => {
+      const result = await sendInvoiceEmail("not-valid", invoiceData, mockTransport);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("Invalid");
+    });
+
+    it("rejects empty email recipient", async () => {
+      const result = await sendInvoiceEmail("", invoiceData, mockTransport);
+      expect(result.success).toBe(false);
+    });
+
+    it("handles transport errors gracefully", async () => {
+      const failTransport: EmailTransport = {
+        sendMail: vi.fn().mockRejectedValue(new Error("SMTP connection refused")),
+      };
+      const result = await sendInvoiceEmail("maria@email.com", invoiceData, failTransport);
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("SMTP connection refused");
+    });
+
+    it("includes formatted subject line with amount and due date", async () => {
+      await sendInvoiceEmail("maria@email.com", invoiceData, mockTransport);
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: expect.stringContaining("3,500"),
+        })
+      );
     });
   });
 });

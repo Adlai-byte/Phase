@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { createBoardingHouse } from "./boarding-house";
 import { createRoom, updateRoomStatus } from "./room";
 import { createTenant, assignTenantToRoom, updateTenant } from "./tenant";
-import { createInvoice, markInvoicePaid, generateMonthlyInvoices } from "./invoice";
+import { createInvoice, markInvoicePaid, cancelInvoice, generateMonthlyInvoices } from "./invoice";
+import { cancelTransfer } from "./transfer";
 import { createTransfer, approveTransfer } from "./transfer";
 import { getOwnerDashboardStats, getOccupancyStats } from "./analytics";
 import { cleanupTestDb, disconnectTestDb } from "@/test/db";
@@ -149,6 +150,80 @@ describe("Edge Cases", () => {
     });
   });
 
+  describe("Cancel invoice", () => {
+    it("cancels a pending invoice", async () => {
+      const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
+      const inv = await createInvoice({ tenantId: tenant.tenant!.id, boardingHouseId: houseId, amount: 3000, type: "RENT", dueDate: new Date("2026-05-05") });
+
+      const result = await cancelInvoice(inv.invoice!.id);
+      expect(result.success).toBe(true);
+      expect(result.invoice!.status).toBe("CANCELLED");
+    });
+
+    it("rejects cancelling a paid invoice", async () => {
+      const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
+      const inv = await createInvoice({ tenantId: tenant.tenant!.id, boardingHouseId: houseId, amount: 3000, type: "RENT", dueDate: new Date("2026-05-05") });
+      await markInvoicePaid(inv.invoice!.id);
+
+      const result = await cancelInvoice(inv.invoice!.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("paid");
+    });
+
+    it("rejects paying a cancelled invoice", async () => {
+      const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
+      const inv = await createInvoice({ tenantId: tenant.tenant!.id, boardingHouseId: houseId, amount: 3000, type: "RENT", dueDate: new Date("2026-05-05") });
+      await cancelInvoice(inv.invoice!.id);
+
+      const result = await markInvoicePaid(inv.invoice!.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("cancelled");
+    });
+  });
+
+  describe("Cancel transfer", () => {
+    it("cancels a pending transfer", async () => {
+      const room1 = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const room2 = await createRoom({ number: "102", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room1.room!.id });
+      const transfer = await createTransfer({ tenantId: tenant.tenant!.id, fromRoomId: room1.room!.id, toRoomId: room2.room!.id });
+
+      const result = await cancelTransfer(transfer.transfer!.id);
+      expect(result.success).toBe(true);
+      expect(result.transfer!.status).toBe("CANCELLED");
+    });
+
+    it("rejects cancelling a completed transfer", async () => {
+      const room1 = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const room2 = await createRoom({ number: "102", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room1.room!.id });
+      const transfer = await createTransfer({ tenantId: tenant.tenant!.id, fromRoomId: room1.room!.id, toRoomId: room2.room!.id });
+      await approveTransfer(transfer.transfer!.id);
+
+      const result = await cancelTransfer(transfer.transfer!.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("pending");
+    });
+  });
+
+  describe("Invoice idempotency", () => {
+    it("rejects generating invoices for the same period twice", async () => {
+      const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
+
+      const first = await generateMonthlyInvoices(houseId, "2026-05");
+      expect(first.success).toBe(true);
+      expect(first.count).toBe(1);
+
+      const second = await generateMonthlyInvoices(houseId, "2026-05");
+      expect(second.success).toBe(false);
+      expect(second.error).toContain("already exist");
+    });
+  });
+
   describe("Tenant lifecycle", () => {
     it("frees room when tenant set to INACTIVE", async () => {
       const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
@@ -161,6 +236,18 @@ describe("Edge Cases", () => {
 
       const afterRoom = await prisma.room.findUnique({ where: { id: room.room!.id } });
       expect(afterRoom!.status).toBe("AVAILABLE");
+    });
+
+    it("unlinks room and sets moveOutDate when INACTIVE", async () => {
+      const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
+      const tenant = await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
+
+      await updateTenant({ id: tenant.tenant!.id, status: "INACTIVE" });
+
+      const updated = await prisma.tenant.findUnique({ where: { id: tenant.tenant!.id } });
+      expect(updated!.roomId).toBeNull();
+      expect(updated!.moveOutDate).not.toBeNull();
+      expect(updated!.status).toBe("INACTIVE");
     });
   });
 

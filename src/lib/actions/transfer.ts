@@ -71,6 +71,23 @@ export async function approveTransfer(transferId: string) {
   return { success: true as const, transfer: updated };
 }
 
+export async function cancelTransfer(transferId: string) {
+  const transfer = await prisma.roomTransfer.findUnique({ where: { id: transferId } });
+  if (!transfer) {
+    return { success: false as const, error: "Transfer not found" };
+  }
+  if (transfer.status !== "PENDING") {
+    return { success: false as const, error: "Only pending transfers can be cancelled" };
+  }
+
+  const updated = await prisma.roomTransfer.update({
+    where: { id: transferId },
+    data: { status: "CANCELLED" },
+  });
+
+  return { success: true as const, transfer: updated };
+}
+
 export async function getTransferHistory(boardingHouseId: string) {
   // Get transfers via rooms belonging to this house
   const rooms = await prisma.room.findMany({
