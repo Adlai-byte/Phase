@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Search,
@@ -102,12 +103,12 @@ export default function LandingClient({
       <nav className="glass fixed top-0 right-0 left-0 z-50 shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
           {/* Logo */}
-          <a
-            href="#"
+          <Link
+            href="/"
             className="font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight text-primary"
           >
             Phase
-          </a>
+          </Link>
 
           {/* Desktop links */}
           <div className="hidden items-center gap-8 md:flex">
@@ -133,12 +134,12 @@ export default function LandingClient({
 
           {/* Desktop CTA */}
           <div className="hidden items-center gap-3 md:flex">
-            <button className="rounded-full px-5 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container">
+            <Link href="/login" className="rounded-full px-5 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container">
               Log in
-            </button>
-            <button className="gradient-primary cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)]">
+            </Link>
+            <Link href="/register" className="gradient-primary cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)]">
               Register
-            </button>
+            </Link>
           </div>
 
           {/* Mobile hamburger */}
@@ -185,12 +186,12 @@ export default function LandingClient({
                 Pricing
               </a>
               <div className="flex gap-3 pt-2">
-                <button className="rounded-full px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container">
+                <Link href="/login" className="rounded-full px-5 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container" onClick={() => setMobileMenuOpen(false)}>
                   Log in
-                </button>
-                <button className="gradient-primary rounded-full px-5 py-2.5 text-sm font-semibold text-on-primary">
+                </Link>
+                <Link href="/register" className="gradient-primary rounded-full px-5 py-2.5 text-sm font-semibold text-on-primary" onClick={() => setMobileMenuOpen(false)}>
                   Register
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -272,10 +273,10 @@ export default function LandingClient({
               </div>
 
               {/* Search button */}
-              <button className="gradient-primary flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-on-primary transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)] md:rounded-l-none md:rounded-r-xl">
+              <Link href="/find" className="gradient-primary flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-on-primary transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)] md:rounded-l-none md:rounded-r-xl">
                 <Search className="size-4" />
                 <span>Search</span>
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -702,9 +703,9 @@ export default function LandingClient({
                   </li>
                 ))}
               </ul>
-              <button className="mt-8 w-full cursor-pointer rounded-full bg-surface-container py-3 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high">
+              <Link href="/register" className="mt-8 block w-full cursor-pointer rounded-full bg-surface-container py-3 text-center text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high">
                 Get Started Free
-              </button>
+              </Link>
             </div>
 
             {/* Professional - highlighted */}
@@ -744,9 +745,9 @@ export default function LandingClient({
                     </li>
                   ))}
                 </ul>
-                <button className="gradient-primary mt-8 w-full cursor-pointer rounded-full py-3 text-sm font-semibold text-on-primary transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)]">
+                <Link href="/register" className="gradient-primary mt-8 block w-full cursor-pointer rounded-full py-3 text-center text-sm font-semibold text-on-primary transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(0,77,100,0.18)]">
                   Start 14-Day Trial
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -779,9 +780,9 @@ export default function LandingClient({
                   </li>
                 ))}
               </ul>
-              <button className="mt-8 w-full cursor-pointer rounded-full bg-surface-container py-3 text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high">
+              <Link href="/register" className="mt-8 block w-full cursor-pointer rounded-full bg-surface-container py-3 text-center text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container-high">
                 Contact Sales
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -800,14 +801,14 @@ export default function LandingClient({
             manage their properties and reach more tenants.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button className="flex cursor-pointer items-center gap-2 rounded-full bg-surface-container-lowest px-8 py-3.5 text-sm font-semibold text-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)]">
+            <Link href="/register" className="flex cursor-pointer items-center gap-2 rounded-full bg-surface-container-lowest px-8 py-3.5 text-sm font-semibold text-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)]">
               Register Your Property
               <ArrowRight className="size-4" />
-            </button>
-            <button className="flex cursor-pointer items-center gap-2 rounded-full bg-white/15 px-8 py-3.5 text-sm font-semibold text-on-primary backdrop-blur-sm transition-colors hover:bg-white/25">
+            </Link>
+            <a href="#how-it-works" className="flex cursor-pointer items-center gap-2 rounded-full bg-white/15 px-8 py-3.5 text-sm font-semibold text-on-primary backdrop-blur-sm transition-colors hover:bg-white/25">
               Learn More
               <ChevronRight className="size-4" />
-            </button>
+            </a>
           </div>
         </div>
       </section>
@@ -835,26 +836,10 @@ export default function LandingClient({
                 For Tenants
               </p>
               <ul className="flex flex-col gap-2.5 text-sm text-inverse-on-surface/70">
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Browse Listings
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    How It Works
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Safety Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    FAQs
-                  </a>
-                </li>
+                <li><Link href="/find" className="transition-colors hover:text-inverse-primary">Browse Listings</Link></li>
+                <li><a href="#how-it-works" className="transition-colors hover:text-inverse-primary">How It Works</a></li>
+                <li><Link href="/find" className="transition-colors hover:text-inverse-primary">Search Rooms</Link></li>
+                <li><Link href="/register" className="transition-colors hover:text-inverse-primary">Sign Up</Link></li>
               </ul>
             </div>
 
@@ -864,26 +849,10 @@ export default function LandingClient({
                 For Owners
               </p>
               <ul className="flex flex-col gap-2.5 text-sm text-inverse-on-surface/70">
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    List Your Property
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Owner Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Support
-                  </a>
-                </li>
+                <li><Link href="/register" className="transition-colors hover:text-inverse-primary">List Your Property</Link></li>
+                <li><a href="#pricing" className="transition-colors hover:text-inverse-primary">Pricing</a></li>
+                <li><Link href="/login" className="transition-colors hover:text-inverse-primary">Owner Dashboard</Link></li>
+                <li><Link href="/register" className="transition-colors hover:text-inverse-primary">Get Started</Link></li>
               </ul>
             </div>
 
@@ -893,26 +862,10 @@ export default function LandingClient({
                 Company
               </p>
               <ul className="flex flex-col gap-2.5 text-sm text-inverse-on-surface/70">
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    About Phase
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-inverse-primary">
-                    Contact Us
-                  </a>
-                </li>
+                <li><Link href="/" className="transition-colors hover:text-inverse-primary">About Phase</Link></li>
+                <li><Link href="/privacy" className="transition-colors hover:text-inverse-primary">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="transition-colors hover:text-inverse-primary">Terms of Service</Link></li>
+                <li><Link href="/register" className="transition-colors hover:text-inverse-primary">Contact Us</Link></li>
               </ul>
             </div>
           </div>

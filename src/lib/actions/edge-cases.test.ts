@@ -210,7 +210,7 @@ describe("Edge Cases", () => {
   });
 
   describe("Invoice idempotency", () => {
-    it("rejects generating invoices for the same period twice", async () => {
+    it("skips tenants who already have invoices for the period", async () => {
       const room = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 3000, boardingHouseId: houseId });
       await createTenant({ name: "Maria", phone: "0917-111-0000", boardingHouseId: houseId, roomId: room.room!.id });
 
@@ -218,9 +218,10 @@ describe("Edge Cases", () => {
       expect(first.success).toBe(true);
       expect(first.count).toBe(1);
 
+      // Second run: should create 0 (per-tenant idempotency)
       const second = await generateMonthlyInvoices(houseId, "2026-05");
-      expect(second.success).toBe(false);
-      expect(second.error).toContain("already exist");
+      expect(second.success).toBe(true);
+      expect(second.count).toBe(0);
     });
   });
 

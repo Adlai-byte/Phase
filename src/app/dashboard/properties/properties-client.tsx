@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Building2,
@@ -17,8 +19,13 @@ import {
   UserPlus,
   Wrench,
   Eye,
+  X,
 } from "lucide-react";
 import { formatCurrency, getInitials } from "@/lib/utils";
+import { addBoardingHouse, addRoom } from "@/app/actions/dashboard";
+import { useToast } from "@/components/ui/toast";
+import { ChipSelector, AMENITY_OPTIONS, RESTRICTION_OPTIONS } from "@/components/ui/chip-selector";
+import { getRoomTypeLabel, getRoomTypeBadgeColor } from "@/lib/constants/room-types";
 
 type Tenant = {
   id: string;
@@ -132,6 +139,39 @@ function getHouseTypeBadgeClass(type: string): string {
 
 export default function PropertiesClient({ houses, rooms }: PropertiesClientProps) {
   const house = houses[0];
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddRoomModal, setShowAddRoomModal] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const { success: toastSuccess, error: toastError } = useToast();
+
+  async function handleAddProperty(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const result = await addBoardingHouse(formData);
+    if (result.success) {
+      setShowAddModal(false);
+      toastSuccess("Property created! It will be visible after admin verification.");
+      startTransition(() => { router.refresh(); });
+    } else {
+      toastError(result.error || "Failed to create property");
+    }
+  }
+
+  async function handleAddRoom(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!house) return;
+    const formData = new FormData(e.currentTarget);
+    formData.set("boardingHouseId", house.id);
+    const result = await addRoom(formData);
+    if (result.success) {
+      setShowAddRoomModal(false);
+      toastSuccess("Room added successfully");
+      startTransition(() => { router.refresh(); });
+    } else {
+      toastError(result.error || "Failed to add room");
+    }
+  }
 
   const occupiedCount = rooms.filter((r) => r.status === "OCCUPIED").length;
   const availableCount = rooms.filter((r) => r.status === "AVAILABLE").length;
@@ -180,7 +220,7 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
               Manage your boarding houses and rooms
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-full gradient-primary px-6 py-3 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-all duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)] hover:-translate-y-0.5">
+          <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 rounded-full gradient-primary px-6 py-3 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-all duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)] hover:-translate-y-0.5">
             <Plus className="h-4 w-4" />
             Add Property
           </button>
@@ -210,7 +250,7 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
             Manage your boarding houses and rooms
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-full gradient-primary px-6 py-3 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-all duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)] hover:-translate-y-0.5">
+        <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 rounded-full gradient-primary px-6 py-3 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-all duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)] hover:-translate-y-0.5">
           <Plus className="h-4 w-4" />
           Add Property
         </button>
@@ -345,10 +385,10 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
                 <Eye className="h-4 w-4" />
                 View Details
               </Link>
-              <button className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 font-[family-name:var(--font-body)] text-sm font-medium text-on-surface hover:bg-surface-container transition-colors duration-200">
+              <Link href={`/dashboard/properties/${house.id}`} className="inline-flex items-center gap-2 rounded-full bg-surface-container-low px-4 py-2 font-[family-name:var(--font-body)] text-sm font-medium text-on-surface hover:bg-surface-container transition-colors duration-200">
                 <Settings className="h-4 w-4" />
                 Manage
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -365,6 +405,10 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
               {rooms.length} rooms across {floors.size} {floors.size === 1 ? "floor" : "floors"}
             </p>
           </div>
+          <button onClick={() => setShowAddRoomModal(true)} className="inline-flex items-center gap-2 rounded-full gradient-primary px-5 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary hover:opacity-90 transition-opacity">
+            <Plus className="h-4 w-4" />
+            Add Room
+          </button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -385,9 +429,14 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
                       </span>
                       <StatusBadge status={room.status} />
                     </div>
-                    <p className="mt-0.5 font-[family-name:var(--font-body)] text-xs text-on-surface-variant">
-                      Floor {room.floor} &middot; {room.capacity} pax capacity
-                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getRoomTypeBadgeColor((room as any).roomType || "BEDSPACER")}`}>
+                        {getRoomTypeLabel((room as any).roomType || "BEDSPACER")}
+                      </span>
+                      <span className="font-[family-name:var(--font-body)] text-xs text-on-surface-variant">
+                        Floor {room.floor} · {room.capacity} pax
+                      </span>
+                    </div>
                   </div>
                   <ChevronRight className="h-5 w-5 text-outline opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                 </div>
@@ -467,13 +516,18 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
 
                 {/* Action buttons */}
                 {room.status === "AVAILABLE" && (
-                  <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-full gradient-primary px-4 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary transition-all duration-200 hover:shadow-[0_10px_30px_-5px_rgba(24,28,30,0.1)]">
+                  <Link href="/dashboard/tenants" className="mt-4 flex w-full items-center justify-center gap-2 rounded-full gradient-primary px-4 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary transition-all duration-200 hover:shadow-[0_10px_30px_-5px_rgba(24,28,30,0.1)]">
                     <UserPlus className="h-4 w-4" />
                     Assign Tenant
-                  </button>
+                  </Link>
                 )}
                 {room.status === "MAINTENANCE" && (
-                  <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-surface-container-low px-4 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors duration-200">
+                  <button onClick={async () => {
+                    const { changeRoomStatus } = await import("@/app/actions/dashboard");
+                    const result = await changeRoomStatus(room.id, "AVAILABLE");
+                    if (result.success) { toastSuccess("Room marked as available"); router.refresh(); }
+                    else toastError(result.error || "Failed");
+                  }} className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-surface-container-low px-4 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors duration-200">
                     <Wrench className="h-4 w-4" />
                     Mark Available
                   </button>
@@ -483,6 +537,155 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
           })}
         </div>
       </div>
+
+      {/* Add Room Modal */}
+      {showAddRoomModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddRoomModal(false)} />
+          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
+            <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Room</h2>
+              <button onClick={() => setShowAddRoomModal(false)} className="text-on-primary/70 hover:text-on-primary"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAddRoom} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Number *</label>
+                  <input name="number" type="text" required placeholder="e.g. 101" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Floor *</label>
+                  <input name="floor" type="number" required min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Type *</label>
+                <select name="roomType" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
+                  <option value="BEDSPACER">Bedspacer</option>
+                  <option value="SOLO_ROOM">Solo Room</option>
+                  <option value="DUAL_BED">Dual Bed</option>
+                  <option value="APARTMENT">Apartment</option>
+                  <option value="STUDIO">Studio</option>
+                  <option value="FAMILY_ROOM">Family Room</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Monthly Rate (₱) *</label>
+                  <input name="monthlyRate" type="number" required min="1" placeholder="3000" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Capacity</label>
+                  <input name="capacity" type="number" min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide">Amenities</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
+                    <input name="hasAircon" type="checkbox" className="accent-primary" /> Air Conditioning
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
+                    <input name="hasWifi" type="checkbox" className="accent-primary" /> WiFi
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
+                    <input name="hasBathroom" type="checkbox" className="accent-primary" /> Private Bathroom
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
+                    <input name="electricityIncluded" type="checkbox" className="accent-primary" /> Electricity Included
+                  </label>
+                </div>
+              </div>
+              <div className="bg-surface-container-low px-6 py-4 -mx-6 -mb-6 mt-4 flex justify-end gap-3 rounded-b-2xl">
+                <button type="button" onClick={() => setShowAddRoomModal(false)} className="px-5 py-2.5 rounded-full text-sm font-medium text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-colors">Cancel</button>
+                <button type="submit" disabled={isPending} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 inline-flex items-center gap-2">
+                  <Home size={16} />
+                  {isPending ? "Adding..." : "Add Room"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Property Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
+            <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
+                Add New Property
+              </h2>
+              <button onClick={() => setShowAddModal(false)} className="text-on-primary/70 hover:text-on-primary">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleAddProperty} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Property Name *</label>
+                <input name="name" type="text" required placeholder="e.g. Casa Marina Residences"
+                  className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Address *</label>
+                <input name="address" type="text" required placeholder="e.g. Brgy. Sainz, Mati City"
+                  className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Type *</label>
+                  <select name="type" required
+                    className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
+                    <option value="MIXED">Mixed</option>
+                    <option value="ALL_FEMALE">All Female</option>
+                    <option value="ALL_MALE">All Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Curfew Time</label>
+                  <input name="curfewTime" type="time"
+                    className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Description</label>
+                <textarea name="description" rows={3} placeholder="Describe your boarding house..."
+                  className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
+              </div>
+              <ChipSelector label="Amenities" name="amenities" options={AMENITY_OPTIONS} />
+              <ChipSelector label="Restrictions" name="restrictions" options={RESTRICTION_OPTIONS} />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Phone</label>
+                  <input name="contactPhone" type="tel" placeholder="0917-xxx-xxxx"
+                    className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Email</label>
+                  <input name="contactEmail" type="email" placeholder="you@email.com"
+                    className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input name="hasCurfew" type="checkbox" className="accent-primary" />
+                <span className="text-sm text-on-surface-variant">This property has a curfew</span>
+              </div>
+              <div className="bg-surface-container-low px-6 py-4 -mx-6 -mb-6 mt-6 flex justify-end gap-3 rounded-b-2xl">
+                <button type="button" onClick={() => setShowAddModal(false)}
+                  className="px-5 py-2.5 rounded-full text-sm font-medium text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isPending}
+                  className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 inline-flex items-center gap-2">
+                  <Building2 size={16} />
+                  {isPending ? "Creating..." : "Create Property"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

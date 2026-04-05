@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   TrendingUp,
   Receipt,
@@ -54,7 +55,7 @@ export default function BillingClient({
 }: BillingClientProps) {
   const maxRevenue =
     revenueData.length > 0
-      ? Math.max(...revenueData.map((d) => d.revenue))
+      ? Math.max(...revenueData.map((d) => d.revenue), 1)
       : 1;
 
   return (
@@ -224,7 +225,7 @@ export default function BillingClient({
           </p>
 
           <div className="mt-5 space-y-2.5">
-            <button
+            <Link href="/dashboard/invoices"
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3
                 gradient-primary
                 font-[family-name:var(--font-body)] text-sm font-semibold text-on-primary
@@ -232,8 +233,8 @@ export default function BillingClient({
             >
               <FileText className="h-5 w-5" />
               Generate All Invoices
-            </button>
-            <button
+            </Link>
+            <Link href="/dashboard/invoices"
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3
                 bg-surface-container-low
                 font-[family-name:var(--font-body)] text-sm font-medium text-on-surface
@@ -242,8 +243,8 @@ export default function BillingClient({
               <DollarSign className="h-5 w-5 text-tertiary" />
               Record Payment
               <ArrowUpRight className="ml-auto h-4 w-4 text-on-surface-variant" />
-            </button>
-            <button
+            </Link>
+            <Link href="/dashboard/billing"
               className="flex w-full items-center gap-3 rounded-xl px-4 py-3
                 bg-surface-container-low
                 font-[family-name:var(--font-body)] text-sm font-medium text-on-surface
@@ -252,7 +253,7 @@ export default function BillingClient({
               <Download className="h-5 w-5 text-primary" />
               Export Report
               <ArrowUpRight className="ml-auto h-4 w-4 text-on-surface-variant" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -271,12 +272,12 @@ export default function BillingClient({
               Latest payment transactions
             </p>
           </div>
-          <button
+          <Link href="/dashboard/invoices"
             className="rounded-xl px-4 py-2 font-[family-name:var(--font-body)] text-sm font-medium
               text-primary hover:bg-primary-fixed transition-colors duration-200"
           >
             View All
-          </button>
+          </Link>
         </div>
 
         {recentPayments.length === 0 ? (

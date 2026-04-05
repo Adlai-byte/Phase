@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   UserPlus,
   Search,
@@ -8,6 +9,7 @@ import {
   Edit,
   MoreHorizontal,
   ChevronLeft,
+  X,
   ChevronRight,
   Users,
   Mail,
@@ -16,6 +18,9 @@ import {
   Calendar,
 } from "lucide-react";
 import { formatCurrency, getInitials, getStatusColor } from "@/lib/utils";
+import { addTenant } from "@/app/actions/dashboard";
+import { useToast } from "@/components/ui/toast";
+import { TenantProfileModal } from "@/components/ui/tenant-profile-modal";
 
 type TenantRoom = {
   id: string;
@@ -57,12 +62,34 @@ function formatMoveIn(date: Date | string): string {
 interface TenantsClientProps {
   tenants: Tenant[];
   boardingHouseName: string;
+  boardingHouseId: string;
 }
 
-export default function TenantsClient({ tenants, boardingHouseName }: TenantsClientProps) {
+export default function TenantsClient({ tenants, boardingHouseName, boardingHouseId }: TenantsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<StatusFilter>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const { success: toastSuccess, error: toastError } = useToast();
+
+  async function handleAddTenant(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.set("boardingHouseId", boardingHouseId);
+    const result = await addTenant(formData);
+    if (result.success) {
+      setShowAddModal(false);
+      toastSuccess("Tenant added successfully");
+      startTransition(() => { router.refresh(); });
+    } else {
+      toastError(result.error || "Failed to add tenant");
+    }
+  }
+
+  const [viewTenantId, setViewTenantId] = useState<string | null>(null);
+  const [menuTenantId, setMenuTenantId] = useState<string | null>(null);
 
   const stats = useMemo(
     () => [
@@ -150,7 +177,7 @@ export default function TenantsClient({ tenants, boardingHouseName }: TenantsCli
             Manage and view all tenant information
           </p>
         </div>
-        <button className="gradient-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-white shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)]">
+        <button onClick={() => setShowAddModal(true)} className="gradient-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-[family-name:var(--font-body)] text-sm font-semibold text-white shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] transition-shadow duration-200 hover:shadow-[0_20px_40px_-8px_rgba(24,28,30,0.08)]">
           <UserPlus className="h-4 w-4" />
           Add Tenant
         </button>
@@ -312,23 +339,39 @@ export default function TenantsClient({ tenants, boardingHouseName }: TenantsCli
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-1">
                     <button
+                      onClick={() => setViewTenantId(tenant.id)}
                       className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                       title="View tenant"
                     >
                       <Eye className="h-4 w-4" />
                     </button>
                     <button
+                      onClick={() => setViewTenantId(tenant.id)}
                       className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                       title="Edit tenant"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button
-                      className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
-                      title="More options"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
+                        className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
+                        title="More options"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                      {menuTenantId === tenant.id && (
+                        <div className="absolute right-0 top-10 w-48 bg-surface-container-lowest rounded-xl shadow-[0_10px_30px_-5px_rgba(24,28,30,0.12)] z-20 overflow-hidden animate-slide-up">
+                          <button onClick={async () => {
+                            const { editTenant: et } = await import("@/app/actions/dashboard");
+                            const fd = new FormData(); fd.set("id", tenant.id); fd.set("status", "INACTIVE");
+                            await et(fd); setMenuTenantId(null); router.refresh();
+                          }} className="w-full px-4 py-2.5 text-left text-sm text-error hover:bg-error-container/20">Set Inactive</button>
+                          <a href="/dashboard/transfers" className="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low">Transfer Room</a>
+                          <a href="/dashboard/invoices" className="block px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low">View Invoices</a>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -416,18 +459,21 @@ export default function TenantsClient({ tenants, boardingHouseName }: TenantsCli
               </span>
               <div className="flex items-center gap-1">
                 <button
+                  onClick={() => setViewTenantId(tenant.id)}
                   className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                   title="View tenant"
                 >
                   <Eye className="h-4 w-4" />
                 </button>
                 <button
+                  onClick={() => setViewTenantId(tenant.id)}
                   className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                   title="Edit tenant"
                 >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
+                  onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
                   className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                   title="More options"
                 >
@@ -509,6 +555,72 @@ export default function TenantsClient({ tenants, boardingHouseName }: TenantsCli
           </div>
         </div>
       )}
+
+      {/* Add Tenant Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
+            <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Tenant</h2>
+              <button onClick={() => setShowAddModal(false)} className="text-on-primary/70 hover:text-on-primary"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAddTenant} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Full Name *</label>
+                <input name="name" type="text" required placeholder="Juan Dela Cruz" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Phone *</label>
+                <input name="phone" type="tel" required placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Email</label>
+                <input name="email" type="email" placeholder="email@example.com" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Tenant Type</label>
+                <div className="flex gap-2">
+                  {[
+                    { value: "STUDENT", label: "Student" },
+                    { value: "WORKING_PROFESSIONAL", label: "Working Professional" },
+                    { value: "OTHER", label: "Other" },
+                  ].map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-1.5 text-sm text-on-surface cursor-pointer">
+                      <input type="radio" name="tag" value={opt.value} className="accent-primary" />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Contact</label>
+                  <input name="emergencyContact" type="text" placeholder="Parent/Guardian name" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Phone</label>
+                  <input name="emergencyPhone" type="tel" placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+              </div>
+              <div className="bg-surface-container-low px-6 py-4 -mx-6 -mb-6 mt-4 flex justify-end gap-3 rounded-b-2xl">
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-full text-sm font-medium text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-colors">Cancel</button>
+                <button type="submit" disabled={isPending} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 inline-flex items-center gap-2">
+                  <UserPlus size={16} />
+                  {isPending ? "Adding..." : "Add Tenant"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Tenant Profile Modal */}
+      <TenantProfileModal
+        tenantId={viewTenantId}
+        open={!!viewTenantId}
+        onClose={() => setViewTenantId(null)}
+      />
     </div>
   );
 }

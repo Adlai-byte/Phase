@@ -168,7 +168,7 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
               {house.address}, {house.city}
             </p>
           </div>
-          <button className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-2">
+          <button onClick={() => setActiveTab("Settings")} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-2">
             <Edit size={16} />
             Edit Property
           </button>
@@ -367,13 +367,17 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
                 </div>
 
                 {room.status === "AVAILABLE" && (
-                  <button className="w-full py-2 rounded-full text-xs font-medium gradient-primary text-on-primary hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                  <Link href="/dashboard/tenants" className="w-full py-2 rounded-full text-xs font-medium gradient-primary text-on-primary hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                     <UserPlus size={12} />
                     Assign Tenant
-                  </button>
+                  </Link>
                 )}
                 {room.status === "MAINTENANCE" && (
-                  <button className="w-full py-2 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1">
+                  <button onClick={async () => {
+                    const { changeRoomStatus } = await import("@/app/actions/dashboard");
+                    await changeRoomStatus(room.id, "AVAILABLE");
+                    window.location.reload();
+                  }} className="w-full py-2 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1">
                     <Wrench size={12} />
                     Mark Available
                   </button>
@@ -537,10 +541,10 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
             />
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <button className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+            <button onClick={() => setActiveTab("Overview")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
               Cancel
             </button>
-            <button className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
+            <button onClick={() => alert("Property settings saved (demo)")} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
               Save Changes
             </button>
           </div>

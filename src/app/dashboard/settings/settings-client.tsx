@@ -203,7 +203,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                 </div>
 
                 <div className="flex justify-end">
-                  <button className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2">
+                  <button onClick={() => alert("Profile updated (demo)")} className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2">
                     <Save size={16} />
                     Save Changes
                   </button>
@@ -276,7 +276,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       </span>
                     </p>
                   </div>
-                  <button className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+                  <button onClick={() => alert("Plan upgrade coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
                     Change Plan
                   </button>
                 </div>
@@ -325,7 +325,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       placeholder="Confirm new password"
                       className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <button className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity">
+                    <button onClick={() => alert("Password updated (demo)")} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity">
                       Update Password
                     </button>
                   </div>
@@ -337,7 +337,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                   <p className="text-xs text-on-surface-variant mb-3">
                     Add an extra layer of security to your account
                   </p>
-                  <button className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+                  <button onClick={() => alert("2FA setup coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
                     Enable 2FA
                   </button>
                 </div>

@@ -115,7 +115,7 @@ export default function AnalyticsClient({
             <Calendar size={14} />
             Last 6 months
           </div>
-          <button className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors inline-flex items-center gap-2">
+          <button onClick={() => alert("Export coming soon")} className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors inline-flex items-center gap-2">
             <Download size={14} />
             Export
           </button>

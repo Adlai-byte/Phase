@@ -6,6 +6,14 @@ export async function getTestDb() {
 
 export async function cleanupTestDb() {
   const tables = [
+    "ReminderLog",
+    "ReminderConfig",
+    "Deposit",
+    "Contract",
+    "AnnouncementRead",
+    "Announcement",
+    "AuditLog",
+    "SupportTicket",
     "Notification",
     "RoomTransfer",
     "Bill",

@@ -1,9 +1,9 @@
 "use server";
 
 import { getCurrentUser } from "@/lib/auth/get-user";
-import { getOwnerBoardingHouses, getBoardingHouseById } from "@/lib/actions/boarding-house";
+import { getOwnerBoardingHouses, getBoardingHouseById, createBoardingHouse as createBoardingHouseAction } from "@/lib/actions/boarding-house";
 import { getRooms, createRoom as createRoomAction, updateRoomStatus as updateRoomStatusAction } from "@/lib/actions/room";
-import { getTenants, createTenant as createTenantAction } from "@/lib/actions/tenant";
+import { getTenants, createTenant as createTenantAction, updateTenant as updateTenantAction } from "@/lib/actions/tenant";
 import { getInvoices, createInvoice as createInvoiceAction, markInvoicePaid as markPaidAction, generateMonthlyInvoices as genInvoicesAction } from "@/lib/actions/invoice";
 import { createTransfer as createTransferAction, getTransferHistory } from "@/lib/actions/transfer";
 import { canCreateRoom, canCreateTenant, canSendNotification } from "@/lib/actions/subscription";
@@ -118,6 +118,41 @@ export async function getInvoiceData(boardingHouseId?: string) {
   return { user, houses, invoices };
 }
 
+// ── Boarding House CRUD ──────────────────────────────────────
+
+export async function addBoardingHouse(formData: FormData) {
+  const user = await requireOwner();
+
+  const amenitiesRaw = formData.get("amenities") as string;
+  const restrictionsRaw = formData.get("restrictions") as string;
+
+  const result = await createBoardingHouseAction({
+    name: formData.get("name") as string,
+    address: formData.get("address") as string,
+    type: formData.get("type") as "ALL_FEMALE" | "ALL_MALE" | "MIXED",
+    description: (formData.get("description") as string) || undefined,
+    amenities: amenitiesRaw ? amenitiesRaw.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
+    restrictions: restrictionsRaw ? restrictionsRaw.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
+    hasCurfew: formData.get("hasCurfew") === "on",
+    curfewTime: (formData.get("curfewTime") as string) || undefined,
+    contactPhone: (formData.get("contactPhone") as string) || undefined,
+    contactEmail: (formData.get("contactEmail") as string) || undefined,
+    ownerId: user.id,
+  });
+
+  if (result.success) {
+    await createNotification({
+      userId: user.id,
+      title: "Property Created",
+      message: `${formData.get("name")} has been added. It will be visible after admin verification.`,
+      type: "INFO",
+      link: "/dashboard/properties",
+    });
+    revalidatePath("/dashboard/properties");
+  }
+  return result;
+}
+
 // ── Transfer Data ──────────────────────────────────────────
 
 export async function getTransferData(boardingHouseId?: string) {
@@ -152,6 +187,7 @@ export async function addRoom(formData: FormData) {
     floor: Number(formData.get("floor") || 1),
     capacity: Number(formData.get("capacity") || 1),
     monthlyRate: Number(formData.get("monthlyRate")),
+    roomType: (formData.get("roomType") as string) || "BEDSPACER",
     hasAircon: formData.get("hasAircon") === "on",
     hasWifi: formData.get("hasWifi") === "on",
     hasBathroom: formData.get("hasBathroom") === "on",
@@ -178,6 +214,9 @@ export async function addTenant(formData: FormData) {
     name,
     phone: formData.get("phone") as string,
     email: (formData.get("email") as string) || undefined,
+    emergencyContact: (formData.get("emergencyContact") as string) || undefined,
+    emergencyPhone: (formData.get("emergencyPhone") as string) || undefined,
+    tag: (formData.get("tag") as string) || undefined,
     boardingHouseId,
     roomId: (formData.get("roomId") as string) || undefined,
   });
@@ -192,6 +231,31 @@ export async function addTenant(formData: FormData) {
     });
     revalidatePath("/dashboard/tenants");
   }
+  return result;
+}
+
+export async function editTenant(formData: FormData) {
+  const user = await requireOwner();
+  const tenantId = formData.get("id") as string;
+
+  // Verify tenant belongs to owner's house
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { boardingHouseId: true } });
+  if (!tenant) return { success: false, error: "Tenant not found" };
+  const ownership = await verifyOwnership(user.id, tenant.boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
+  const result = await updateTenantAction({
+    id: tenantId,
+    name: (formData.get("name") as string) || undefined,
+    phone: (formData.get("phone") as string) || undefined,
+    email: (formData.get("email") as string) || undefined,
+    emergencyContact: (formData.get("emergencyContact") as string) || undefined,
+    emergencyPhone: (formData.get("emergencyPhone") as string) || undefined,
+    tag: (formData.get("tag") as string) || undefined,
+    status: (formData.get("status") as "ACTIVE" | "INACTIVE" | "PENDING") || undefined,
+  });
+
+  if (result.success) revalidatePath("/dashboard/tenants");
   return result;
 }
 

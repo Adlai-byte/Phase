@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   LogOut,
+  Bell,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +25,10 @@ const navItems = [
   { label: "Boarding Houses", href: "/admin/boarding-houses", icon: Building2 },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Verifications", href: "/admin/verifications", icon: ShieldCheck },
+  { label: "Audit Log", href: "/admin/audit-log", icon: Settings },
+  { label: "Moderation", href: "/admin/moderation", icon: ShieldCheck },
+  { label: "Broadcasts", href: "/admin/broadcasts", icon: Bell },
+  { label: "Support", href: "/admin/support", icon: MessageSquare },
   { label: "Platform", href: "/admin/platform", icon: Settings },
 ];
 

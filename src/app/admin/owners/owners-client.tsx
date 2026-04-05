@@ -97,7 +97,7 @@ export default function OwnersClient({ owners }: { owners: Owner[] }) {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors inline-flex items-center gap-2">
+          <button onClick={() => alert("Export coming soon")} className="px-4 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors inline-flex items-center gap-2">
             <Download size={16} />
             Export
           </button>
@@ -337,7 +337,7 @@ export default function OwnersClient({ owners }: { owners: Owner[] }) {
                     </>
                   )}
                   {selectedOwnerData.verified && (
-                    <button className="flex-1 py-2.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+                    <button onClick={() => alert("Full profile view coming soon")} className="flex-1 py-2.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
                       View Full Profile
                     </button>
                   )}

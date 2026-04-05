@@ -179,5 +179,42 @@ describe("Invoice & Billing", () => {
       const amounts = invoices.map((i) => i.amount).sort();
       expect(amounts).toEqual([2800, 3500]);
     });
+
+    it("uses tenant move-in day for due date", async () => {
+      // Tenant moved in on 15th → due date should be 15th
+      await prisma.tenant.update({ where: { id: tenantId }, data: { moveInDate: new Date("2025-06-15") } });
+
+      const result = await generateMonthlyInvoices(houseId, "2026-05");
+      expect(result.success).toBe(true);
+
+      const invoices = await getInvoices(houseId);
+      expect(invoices[0].dueDate.getDate()).toBe(15);
+    });
+
+    it("clamps due date to month-end for short months", async () => {
+      // Tenant moved in on 31st → Feb due date should be 28th
+      await prisma.tenant.update({ where: { id: tenantId }, data: { moveInDate: new Date("2025-01-31") } });
+
+      const result = await generateMonthlyInvoices(houseId, "2026-02");
+      expect(result.success).toBe(true);
+
+      const invoices = await getInvoices(houseId);
+      expect(invoices[0].dueDate.getDate()).toBe(28);
+    });
+
+    it("different tenants get different due dates based on move-in", async () => {
+      const room2 = await createRoom({ number: "102", floor: 1, capacity: 1, monthlyRate: 2800, boardingHouseId: houseId });
+      const t2 = await createTenant({ name: "John", phone: "0917-222", boardingHouseId: houseId, roomId: room2.room!.id });
+
+      // Set different move-in dates
+      await prisma.tenant.update({ where: { id: tenantId }, data: { moveInDate: new Date("2025-06-10") } });
+      await prisma.tenant.update({ where: { id: t2.tenant!.id }, data: { moveInDate: new Date("2025-08-25") } });
+
+      await generateMonthlyInvoices(houseId, "2026-05");
+      const invoices = await getInvoices(houseId);
+
+      const dueDates = invoices.map((i) => i.dueDate.getDate()).sort();
+      expect(dueDates).toEqual([10, 25]);
+    });
   });
 });

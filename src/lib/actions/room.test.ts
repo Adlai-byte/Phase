@@ -116,6 +116,25 @@ describe("Room Management", () => {
     });
   });
 
+  describe("roomType", () => {
+    it("defaults to BEDSPACER when not specified", async () => {
+      const result = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 2000, boardingHouseId: houseId });
+      expect(result.room!.roomType).toBe("BEDSPACER");
+    });
+
+    it("creates room with specified type", async () => {
+      const result = await createRoom({ number: "101", floor: 1, capacity: 2, monthlyRate: 4500, boardingHouseId: houseId, roomType: "APARTMENT" });
+      expect(result.room!.roomType).toBe("APARTMENT");
+    });
+
+    it("updates room type", async () => {
+      const created = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 2000, boardingHouseId: houseId });
+      const result = await updateRoom({ id: created.room!.id, roomType: "STUDIO" });
+      expect(result.success).toBe(true);
+      expect(result.room!.roomType).toBe("STUDIO");
+    });
+  });
+
   describe("updateRoomStatus", () => {
     it("changes room status to MAINTENANCE", async () => {
       const created = await createRoom({ number: "101", floor: 1, capacity: 1, monthlyRate: 2000, boardingHouseId: houseId });

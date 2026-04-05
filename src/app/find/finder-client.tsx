@@ -291,9 +291,9 @@ export default function FinderClient({
                     )}
                   </div>
 
-                  <button className="w-full mt-4 py-2.5 rounded-full text-sm font-medium gradient-primary text-on-primary hover:opacity-90 transition-opacity">
+                  <Link href={`/find/${bh.id}`} className="block w-full mt-4 py-2.5 rounded-full text-sm font-medium text-center gradient-primary text-on-primary hover:opacity-90 transition-opacity">
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

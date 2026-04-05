@@ -238,6 +238,24 @@ export default function InvoicesClient({
         </div>
       </div>
 
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total Invoiced", value: summary.total, icon: Receipt, bg: "bg-surface-container-lowest" },
+          { label: "Total Paid", value: summary.paid, icon: FileText, bg: "bg-success-container/30" },
+          { label: "Total Pending", value: summary.pending, icon: FileText, bg: "bg-secondary-container/30" },
+          { label: "Total Overdue", value: summary.overdue, icon: FileText, bg: "bg-error-container/30" },
+        ].map((item) => (
+          <div key={item.label} className={`${item.bg} rounded-2xl p-4 shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)]`}>
+            <div className="flex items-center gap-2 mb-2">
+              <item.icon size={16} className="text-on-surface-variant" />
+              <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wide">{item.label}</span>
+            </div>
+            <p className="text-lg font-bold font-[family-name:var(--font-display)] text-on-surface">{formatCurrency(item.value)}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Desktop Table */}
       <div className="hidden md:block bg-surface-container-lowest rounded-2xl shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] overflow-hidden">
         <table className="w-full">
@@ -364,8 +382,9 @@ export default function InvoicesClient({
                       </button>
                     )}
                     <button
+                      onClick={() => window.print()}
                       className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
-                      title="Download"
+                      title="Download / Print"
                     >
                       <Download size={14} />
                     </button>
@@ -451,51 +470,6 @@ export default function InvoicesClient({
                 )}
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {
-            label: "Total Invoiced",
-            value: summary.total,
-            icon: Receipt,
-            bg: "bg-surface-container-lowest",
-          },
-          {
-            label: "Total Paid",
-            value: summary.paid,
-            icon: FileText,
-            bg: "bg-success-container/30",
-          },
-          {
-            label: "Total Pending",
-            value: summary.pending,
-            icon: FileText,
-            bg: "bg-secondary-container/30",
-          },
-          {
-            label: "Total Overdue",
-            value: summary.overdue,
-            icon: FileText,
-            bg: "bg-error-container/30",
-          },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className={`${item.bg} rounded-2xl p-4 shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)]`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <item.icon size={16} className="text-on-surface-variant" />
-              <span className="text-xs font-medium text-on-surface-variant uppercase tracking-wide">
-                {item.label}
-              </span>
-            </div>
-            <p className="text-lg font-bold font-[family-name:var(--font-display)] text-on-surface">
-              {formatCurrency(item.value)}
-            </p>
           </div>
         ))}
       </div>

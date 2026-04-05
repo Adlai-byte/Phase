@@ -98,7 +98,7 @@ export default function DashboardClient({ userName, stats, revenueData, recentIn
                 </span>
                 <div
                   className="w-full rounded-t-xl gradient-primary transition-all duration-500 ease-out"
-                  style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 4)}%`, minHeight: 8 }}
+                  style={{ height: `${Math.max((data.revenue / maxRevenue) * 100, 2)}%`, minHeight: 4 }}
                 />
                 <span className="font-[family-name:var(--font-body)] text-xs font-medium text-on-surface-variant">{data.label}</span>
               </div>

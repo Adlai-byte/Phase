@@ -21,6 +21,10 @@ model User {
   boardingHouses BoardingHouse[]
   subscription  Subscription?
   notifications Notification[]
+  auditLogs     AuditLog[]
+  announcementsCreated Announcement[] @relation("AnnouncementCreator")
+  announcementReads AnnouncementRead[]
+  supportTickets SupportTicket[]
 
   @@index([role, verified])
 }
@@ -37,6 +41,8 @@ model BoardingHouse {
   coverImage      String?
   verified        Boolean   @default(false)
   published       Boolean   @default(false)
+  flagged         Boolean   @default(false)
+  flagReason      String?
   hasCurfew       Boolean   @default(false)
   curfewTime      String?
   restrictions    String?
@@ -51,6 +57,9 @@ model BoardingHouse {
   tenants         Tenant[]
   invoices        Invoice[]
   bills           Bill[]
+  deposits        Deposit[]
+  contracts       Contract[]
+  reminderConfigs ReminderConfig[]
 
   @@index([ownerId])
   @@index([city, type, published])
@@ -62,6 +71,7 @@ model Room {
   floor               Int      @default(1)
   capacity            Int      @default(1)
   monthlyRate         Float
+  roomType            String   @default("BEDSPACER") // BEDSPACER, SOLO_ROOM, DUAL_BED, APARTMENT, STUDIO, FAMILY_ROOM
   electricityIncluded Boolean  @default(false)
   hasAircon           Boolean  @default(false)
   hasWifi             Boolean  @default(false)
@@ -86,6 +96,9 @@ model Tenant {
   email           String?
   phone           String
   emergencyContact String?
+  emergencyPhone  String?
+  tag             String?   // STUDENT, WORKING_PROFESSIONAL, OTHER
+  photoUrl        String?
   moveInDate      DateTime
   moveOutDate     DateTime?
   status          String    @default("ACTIVE") // ACTIVE, INACTIVE, PENDING
@@ -99,6 +112,8 @@ model Tenant {
   invoices        Invoice[]
   bills           Bill[]
   transfers       RoomTransfer[]
+  deposits        Deposit[]
+  contracts       Contract[]
 
   @@index([boardingHouseId, status])
   @@index([roomId])
@@ -121,6 +136,8 @@ model Invoice {
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   boardingHouseId String
   boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+
+  reminderLogs    ReminderLog[]
 
   @@index([boardingHouseId, status])
   @@index([tenantId])
@@ -178,6 +195,143 @@ model Notification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String   // VERIFY_OWNER, REJECT_OWNER, PAY_INVOICE, CREATE_TENANT, TRANSFER_ROOM, FLAG_LISTING, UNPUBLISH, LOGIN, etc.
+  entityType String?  // User, BoardingHouse, Invoice, Tenant, Room, etc.
+  entityId   String?
+  details    String?  // JSON string with extra context
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([action])
+  @@index([entityType, entityId])
+}
+
+model Announcement {
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  type       String   @default("INFO") // INFO, WARNING, MAINTENANCE, UPDATE
+  targetPlan String?  // null=all, STARTER, PROFESSIONAL, ENTERPRISE
+  targetUserId String? // null=all owners, specific owner id
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  createdById String
+  createdBy  User     @relation("AnnouncementCreator", fields: [createdById], references: [id])
+  reads      AnnouncementRead[]
+
+  @@index([createdAt])
+}
+
+model AnnouncementRead {
+  id             String   @id @default(cuid())
+  readAt         DateTime @default(now())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, announcementId])
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  subject     String
+  message     String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  response    String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Deposit {
+  id              String    @id @default(cuid())
+  amount          Float
+  datePaid        DateTime
+  refundStatus    String    @default("HELD") // HELD, PARTIALLY_REFUNDED, FULLY_REFUNDED, FORFEITED
+  refundAmount    Float?
+  refundDate      DateTime?
+  refundReason    String?
+  conditions      String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([boardingHouseId])
+}
+
+model Contract {
+  id              String    @id @default(cuid())
+  startDate       DateTime
+  endDate         DateTime
+  monthlyRate     Float
+  depositAmount   Float?
+  terms           String?
+  status          String    @default("DRAFT") // DRAFT, ACTIVE, EXPIRED, TERMINATED
+  signedDate      DateTime?
+  signedByTenant  Boolean   @default(false)
+  signedByOwner   Boolean   @default(false)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([boardingHouseId, status])
+}
+
+model ReminderConfig {
+  id              String   @id @default(cuid())
+  name            String
+  triggerType     String   // BEFORE_DUE, AFTER_DUE
+  triggerDays     Int
+  channel         String   // EMAIL, SMS, BOTH
+  templateSubject String?
+  templateBody    String
+  enabled         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  boardingHouseId String
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id], onDelete: Cascade)
+  logs            ReminderLog[]
+
+  @@index([boardingHouseId])
+}
+
+model ReminderLog {
+  id               String   @id @default(cuid())
+  status           String   // SENT, FAILED, SKIPPED
+  channel          String
+  errorMessage     String?
+  sentAt           DateTime @default(now())
+  invoiceId        String
+  invoice          Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  reminderConfigId String
+  reminderConfig   ReminderConfig @relation(fields: [reminderConfigId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([reminderConfigId])
 }
 
 model Subscription {

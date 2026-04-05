@@ -6,6 +6,8 @@ const createTenantSchema = z.object({
   phone: z.string().min(1, "Phone is required"),
   email: z.string().email().optional().or(z.literal("")),
   emergencyContact: z.string().optional(),
+  emergencyPhone: z.string().optional(),
+  tag: z.string().optional(),
   boardingHouseId: z.string(),
   roomId: z.string().optional(),
 });
@@ -23,6 +25,9 @@ export async function createTenant(input: z.infer<typeof createTenantSchema>) {
       data: {
         ...data,
         email: data.email || null,
+        emergencyContact: data.emergencyContact || null,
+        emergencyPhone: data.emergencyPhone || null,
+        tag: data.tag || null,
         moveInDate: new Date(),
         status: "ACTIVE",
         boardingHouseId,
@@ -70,6 +75,8 @@ const updateTenantSchema = z.object({
   phone: z.string().min(1).optional(),
   email: z.string().email().optional().or(z.literal("")),
   emergencyContact: z.string().optional(),
+  emergencyPhone: z.string().optional(),
+  tag: z.string().optional(),
   status: z.enum(["ACTIVE", "INACTIVE", "PENDING"]).optional(),
 });
 

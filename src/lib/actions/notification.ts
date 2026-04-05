@@ -35,10 +35,14 @@ export async function getUnreadCount(userId: string) {
 }
 
 export async function markAsRead(notificationId: string, userId?: string) {
-  const where: Record<string, unknown> = { id: notificationId };
-  if (userId) where.userId = userId;
+  if (userId) {
+    const notif = await prisma.notification.findUnique({ where: { id: notificationId } });
+    if (!notif || notif.userId !== userId) {
+      throw new Error("Notification not found or access denied");
+    }
+  }
   return prisma.notification.update({
-    where,
+    where: { id: notificationId },
     data: { read: true },
   });
 }

@@ -97,31 +97,34 @@ export function calculateElectricityBill(input: {
   return Math.max(0, consumption * input.ratePerUnit);
 }
 
-export async function generateMonthlyInvoices(boardingHouseId: string, period: string) {
-  // Idempotency check: don't generate if rent invoices already exist for this period
-  const existing = await prisma.invoice.findFirst({
-    where: {
-      boardingHouseId,
-      type: "RENT",
-      description: { contains: period },
-    },
-  });
-  if (existing) {
-    return { success: false as const, error: `Invoices for ${period} already exist`, count: 0 };
-  }
+function getBillingDueDate(year: number, month: number, moveInDate: Date): Date {
+  const billingDay = moveInDate.getDate();
+  const lastDayOfMonth = new Date(year, month, 0).getDate();
+  const day = Math.min(billingDay, lastDayOfMonth);
+  return new Date(year, month - 1, day);
+}
 
+export async function generateMonthlyInvoices(boardingHouseId: string, period: string) {
   const tenants = await prisma.tenant.findMany({
     where: { boardingHouseId, status: "ACTIVE", roomId: { not: null } },
     include: { room: true },
   });
 
   const [year, month] = period.split("-").map(Number);
-  const dueDate = new Date(year, month - 1, 5);
 
   const count = await prisma.$transaction(async (tx) => {
     let created = 0;
     for (const tenant of tenants) {
       if (!tenant.room) continue;
+
+      // Per-tenant idempotency check
+      const existing = await tx.invoice.findFirst({
+        where: { tenantId: tenant.id, type: "RENT", description: { contains: period } },
+      });
+      if (existing) continue;
+
+      const dueDate = getBillingDueDate(year, month, tenant.moveInDate);
+
       await tx.invoice.create({
         data: {
           invoiceNumber: generateInvoiceNumber(),

@@ -28,6 +28,7 @@ export default async function TenantsPage() {
     <TenantsClient
       tenants={serializedTenants}
       boardingHouseName={firstHouse?.name ?? "No Property"}
+      boardingHouseId={firstHouse?.id ?? ""}
     />
   );
 }
