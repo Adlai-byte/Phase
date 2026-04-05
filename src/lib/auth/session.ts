@@ -2,10 +2,10 @@ import { SignJWT, jwtVerify } from "jose";
 
 function getSecret() {
   const key = process.env.JWT_SECRET;
-  if (!key && process.env.NODE_ENV === "production") {
-    throw new Error("JWT_SECRET environment variable is required in production");
+  if (!key) {
+    throw new Error("JWT_SECRET environment variable is required");
   }
-  return new TextEncoder().encode(key || "phase-dev-secret-for-local-only");
+  return new TextEncoder().encode(key);
 }
 
 const secret = getSecret();
