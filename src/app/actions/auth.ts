@@ -100,7 +100,7 @@ export async function impersonateOwner(ownerId: string) {
   // Save admin session for return
   const adminToken = cookieStore.get("phase-session")?.value;
   if (adminToken) {
-    cookieStore.set("phase-impersonate", adminToken, { httpOnly: true, sameSite: "lax", maxAge: 60 * 60, path: "/" });
+    cookieStore.set("phase-impersonate", adminToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60, path: "/" });
   }
   await setSessionCookie(token);
   redirect("/dashboard");
@@ -110,7 +110,19 @@ export async function stopImpersonation() {
   const cookieStore = await cookies();
   const adminToken = cookieStore.get("phase-impersonate")?.value;
   if (adminToken) {
-    cookieStore.set("phase-session", adminToken, { httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 7, path: "/" });
+    const { verifyToken } = await import("@/lib/auth/session");
+    const payload = await verifyToken(adminToken);
+    if (!payload || payload.role !== "SUPERADMIN") {
+      cookieStore.delete("phase-impersonate");
+      redirect("/login");
+    }
+    cookieStore.set("phase-session", adminToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
     cookieStore.delete("phase-impersonate");
   }
   redirect("/admin");
