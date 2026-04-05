@@ -12,6 +12,7 @@ import {
   FileText,
   Receipt,
   Send,
+  Download,
   X,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
@@ -352,6 +353,13 @@ export default function InvoicesClient({
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => window.open(`/api/invoices/${inv.id}/pdf`)}
+                      className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
+                      title="Download PDF"
+                    >
+                      <Download size={14} />
+                    </button>
                     {!inv.sentVia && (
                       <button
                         disabled={sendingId === inv.id}
@@ -433,6 +441,13 @@ export default function InvoicesClient({
                 </span>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => window.open(`/api/invoices/${inv.id}/pdf`)}
+                  className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
+                  title="Download PDF"
+                >
+                  <Download size={14} />
+                </button>
                 {inv.status !== "PAID" ? (
                   <button
                     disabled={payingId === inv.id}
