@@ -164,7 +164,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       <input
                         type="text"
                         defaultValue={user.name}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        disabled
+                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -180,7 +181,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       <input
                         type="email"
                         defaultValue={user.email}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        disabled
+                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -196,16 +198,17 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       <input
                         type="tel"
                         defaultValue={user.phone || ""}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        disabled
+                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <button onClick={() => alert("Profile updated (demo)")} className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2">
+                  <button disabled className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm inline-flex items-center gap-2 opacity-60 cursor-not-allowed">
                     <Save size={16} />
-                    Save Changes
+                    Save Changes (Coming Soon)
                   </button>
                 </div>
               </div>
@@ -276,8 +279,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       </span>
                     </p>
                   </div>
-                  <button onClick={() => alert("Plan upgrade coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-                    Change Plan
+                  <button disabled className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant opacity-60 cursor-not-allowed">
+                    Change Plan (Coming Soon)
                   </button>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -313,20 +316,23 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                     <input
                       type="password"
                       placeholder="Current password"
-                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      disabled
+                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     <input
                       type="password"
                       placeholder="New password"
-                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      disabled
+                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     <input
                       type="password"
                       placeholder="Confirm new password"
-                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      disabled
+                      className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                     />
-                    <button onClick={() => alert("Password updated (demo)")} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity">
-                      Update Password
+                    <button disabled className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm opacity-60 cursor-not-allowed">
+                      Update Password (Coming Soon)
                     </button>
                   </div>
                 </div>
@@ -337,8 +343,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                   <p className="text-xs text-on-surface-variant mb-3">
                     Add an extra layer of security to your account
                   </p>
-                  <button onClick={() => alert("2FA setup coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-                    Enable 2FA
+                  <button disabled className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant opacity-60 cursor-not-allowed">
+                    Enable 2FA (Coming Soon)
                   </button>
                 </div>
               </div>

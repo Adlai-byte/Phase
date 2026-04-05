@@ -9,7 +9,6 @@ import {
   Eye,
   Mail,
   MessageSquare,
-  Download,
   FileText,
   Receipt,
   Send,
@@ -381,13 +380,6 @@ export default function InvoicesClient({
                         <Eye size={14} />
                       </button>
                     )}
-                    <button
-                      onClick={() => window.print()}
-                      className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
-                      title="Download / Print"
-                    >
-                      <Download size={14} />
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -476,14 +468,14 @@ export default function InvoicesClient({
 
       {/* Create Invoice Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowCreateModal(false); }}>
           <div
             className="absolute inset-0 bg-primary/20 backdrop-blur-sm"
             onClick={() => setShowCreateModal(false)}
           />
-          <div className="relative bg-surface-container-lowest rounded-2xl shadow-elevated w-full max-w-lg overflow-hidden animate-slide-up">
+          <div role="dialog" aria-modal="true" aria-labelledby="modal-title-create-invoice" className="relative bg-surface-container-lowest rounded-2xl shadow-elevated w-full max-w-lg overflow-hidden animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
+              <h2 id="modal-title-create-invoice" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
                 Create Invoice
               </h2>
               <button
@@ -496,10 +488,11 @@ export default function InvoicesClient({
             <form onSubmit={handleCreateInvoice}>
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <label htmlFor="field-invoice-tenant" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Tenant
                   </label>
                   <select
+                    id="field-invoice-tenant"
                     name="tenantId"
                     required
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
@@ -515,10 +508,11 @@ export default function InvoicesClient({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-invoice-type" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Type
                     </label>
                     <select
+                      id="field-invoice-type"
                       name="type"
                       required
                       className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
@@ -530,10 +524,11 @@ export default function InvoicesClient({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-invoice-amount" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Amount
                     </label>
                     <input
+                      id="field-invoice-amount"
                       type="number"
                       name="amount"
                       required
@@ -545,10 +540,11 @@ export default function InvoicesClient({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <label htmlFor="field-invoice-due-date" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Due Date
                   </label>
                   <input
+                    id="field-invoice-due-date"
                     type="date"
                     name="dueDate"
                     required
@@ -556,10 +552,11 @@ export default function InvoicesClient({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <label htmlFor="field-invoice-description" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Description (optional)
                   </label>
                   <textarea
+                    id="field-invoice-description"
                     name="description"
                     rows={2}
                     placeholder="Add a note..."

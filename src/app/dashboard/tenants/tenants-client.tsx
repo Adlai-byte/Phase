@@ -6,7 +6,6 @@ import {
   UserPlus,
   Search,
   Eye,
-  Edit,
   MoreHorizontal,
   ChevronLeft,
   X,
@@ -345,13 +344,6 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
                     >
                       <Eye className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => setViewTenantId(tenant.id)}
-                      className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
-                      title="Edit tenant"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
                     <div className="relative">
                       <button
                         onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
@@ -466,13 +458,6 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
                   <Eye className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setViewTenantId(tenant.id)}
-                  className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
-                  title="Edit tenant"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button
                   onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
                   className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
                   title="More options"
@@ -558,25 +543,25 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
 
       {/* Add Tenant Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
           <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
+          <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-tenant" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Tenant</h2>
+              <h2 id="modal-title-add-tenant" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Tenant</h2>
               <button onClick={() => setShowAddModal(false)} className="text-on-primary/70 hover:text-on-primary"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddTenant} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Full Name *</label>
-                <input name="name" type="text" required placeholder="Juan Dela Cruz" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label htmlFor="field-tenant-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Full Name *</label>
+                <input id="field-tenant-name" name="name" type="text" required placeholder="Juan Dela Cruz" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Phone *</label>
-                <input name="phone" type="tel" required placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label htmlFor="field-tenant-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Phone *</label>
+                <input id="field-tenant-phone" name="phone" type="tel" required placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Email</label>
-                <input name="email" type="email" placeholder="email@example.com" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <label htmlFor="field-tenant-email" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Email</label>
+                <input id="field-tenant-email" name="email" type="email" placeholder="email@example.com" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Tenant Type</label>
@@ -595,12 +580,12 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Contact</label>
-                  <input name="emergencyContact" type="text" placeholder="Parent/Guardian name" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-tenant-emergency-contact" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Contact</label>
+                  <input id="field-tenant-emergency-contact" name="emergencyContact" type="text" placeholder="Parent/Guardian name" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Phone</label>
-                  <input name="emergencyPhone" type="tel" placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-tenant-emergency-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Phone</label>
+                  <input id="field-tenant-emergency-phone" name="emergencyPhone" type="tel" placeholder="0917-xxx-xxxx" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>
               <div className="bg-surface-container-low px-6 py-4 -mx-6 -mb-6 mt-4 flex justify-end gap-3 rounded-b-2xl">
