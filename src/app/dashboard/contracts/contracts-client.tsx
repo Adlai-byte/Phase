@@ -449,8 +449,9 @@ export default function ContractsClient({
 
       {/* Create Contract Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowCreateModal(false); }}>
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowCreateModal(false); }}>
           <div
+            role="presentation"
             className="absolute inset-0 bg-primary/20 backdrop-blur-sm"
             onClick={() => setShowCreateModal(false)}
           />

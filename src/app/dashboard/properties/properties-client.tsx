@@ -540,8 +540,8 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
 
       {/* Add Room Modal */}
       {showAddRoomModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddRoomModal(false); }}>
-          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddRoomModal(false)} />
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddRoomModal(false); }}>
+          <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddRoomModal(false)} />
           <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-room" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <h2 id="modal-title-add-room" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Room</h2>
@@ -610,8 +610,8 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
 
       {/* Add Property Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
-          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
+          <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
           <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-property" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <h2 id="modal-title-add-property" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">

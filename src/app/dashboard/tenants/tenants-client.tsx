@@ -543,8 +543,8 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
 
       {/* Add Tenant Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
-          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
+          <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
           <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-tenant" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <h2 id="modal-title-add-tenant" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Tenant</h2>

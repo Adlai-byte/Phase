@@ -74,6 +74,7 @@ export default function DashboardLayoutClient({
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
+          role="presentation"
           className="fixed inset-0 z-40 bg-on-surface/20 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -152,9 +153,12 @@ export default function DashboardLayoutClient({
         {/* Owner profile */}
         <div className="p-3">
           <div
+            role="button"
+            tabIndex={0}
             className="flex cursor-pointer items-center gap-3 rounded-xl p-3
               hover:bg-surface-container-low transition-colors duration-200"
             onClick={() => setProfileOpen(!profileOpen)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProfileOpen(!profileOpen); } }}
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-fixed">
               <span className="font-[family-name:var(--font-display)] text-xs font-bold text-primary">
