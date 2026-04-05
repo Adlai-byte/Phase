@@ -321,12 +321,12 @@ export default function LandingClient({
                 Featured Boarding Houses
               </h2>
             </div>
-            <a
+            <Link
               href="/find"
               className="flex items-center gap-1 text-sm font-semibold text-primary transition-colors hover:text-primary-container"
             >
               View all listings <ChevronRight className="size-4" />
-            </a>
+            </Link>
           </div>
 
           {/* Grid */}
