@@ -564,8 +564,8 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
                 <input id="field-tenant-email" name="email" type="email" placeholder="email@example.com" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Tenant Type</label>
-                <div className="flex gap-2">
+                <span className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Tenant Type</span>
+                <div className="flex gap-2" role="radiogroup" aria-label="Tenant Type">
                   {[
                     { value: "STUDENT", label: "Student" },
                     { value: "WORKING_PROFESSIONAL", label: "Working Professional" },

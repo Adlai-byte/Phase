@@ -153,7 +153,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-settings-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Full Name
                     </label>
                     <div className="relative">
@@ -162,6 +162,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                       />
                       <input
+                        id="field-settings-name"
                         type="text"
                         defaultValue={user.name}
                         disabled
@@ -170,7 +171,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-settings-email" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Email
                     </label>
                     <div className="relative">
@@ -179,6 +180,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                       />
                       <input
+                        id="field-settings-email"
                         type="email"
                         defaultValue={user.email}
                         disabled
@@ -187,7 +189,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-settings-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Phone
                     </label>
                     <div className="relative">
@@ -196,6 +198,7 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                         className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                       />
                       <input
+                        id="field-settings-phone"
                         type="tel"
                         defaultValue={user.phone || ""}
                         disabled

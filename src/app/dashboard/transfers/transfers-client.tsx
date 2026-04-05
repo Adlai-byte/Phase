@@ -118,7 +118,7 @@ export default function TransfersClient({
 
               {/* Select Tenant */}
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                <label htmlFor="field-transfer-tenant" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                   Select Tenant
                 </label>
                 <div className="relative">
@@ -127,6 +127,7 @@ export default function TransfersClient({
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                   />
                   <select
+                    id="field-transfer-tenant"
                     name="tenantId"
                     value={selectedTenant}
                     onChange={(e) => setSelectedTenant(e.target.value)}
@@ -144,7 +145,7 @@ export default function TransfersClient({
 
               {/* From Room (auto-filled) */}
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                <label htmlFor="field-transfer-from-room" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                   From Room
                 </label>
                 <div className="relative">
@@ -153,6 +154,7 @@ export default function TransfersClient({
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                   />
                   <input
+                    id="field-transfer-from-room"
                     type="text"
                     value={
                       fromRoom
@@ -177,7 +179,7 @@ export default function TransfersClient({
 
               {/* To Room */}
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                <label htmlFor="field-transfer-to-room" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                   To Room
                 </label>
                 <div className="relative">
@@ -186,6 +188,7 @@ export default function TransfersClient({
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                   />
                   <select
+                    id="field-transfer-to-room"
                     name="toRoomId"
                     value={toRoom}
                     onChange={(e) => setToRoom(e.target.value)}
@@ -209,7 +212,7 @@ export default function TransfersClient({
 
               {/* Reason */}
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                <label htmlFor="field-transfer-reason" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                   Reason
                 </label>
                 <div className="relative">
@@ -218,6 +221,7 @@ export default function TransfersClient({
                     className="absolute left-3 top-3 text-outline"
                   />
                   <textarea
+                    id="field-transfer-reason"
                     name="reason"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
@@ -230,7 +234,7 @@ export default function TransfersClient({
 
               {/* Transfer Date */}
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                <label htmlFor="field-transfer-date" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                   Transfer Date
                 </label>
                 <div className="relative">
@@ -239,6 +243,7 @@ export default function TransfersClient({
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
                   />
                   <input
+                    id="field-transfer-date"
                     type="date"
                     name="transferDate"
                     value={transferDate}

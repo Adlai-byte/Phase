@@ -580,8 +580,8 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide">Amenities</label>
-                <div className="grid grid-cols-2 gap-2">
+                <span className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide">Amenities</span>
+                <div className="grid grid-cols-2 gap-2" role="group" aria-label="Amenities">
                   <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
                     <input name="hasAircon" type="checkbox" className="accent-primary" /> Air Conditioning
                   </label>

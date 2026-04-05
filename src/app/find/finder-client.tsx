@@ -138,10 +138,10 @@ export default function FinderClient({
             <div className="mt-4 pt-4 border-t border-surface-container-low">
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <span className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Type
-                  </label>
-                  <div className="flex flex-wrap gap-2">
+                  </span>
+                  <div className="flex flex-wrap gap-2" role="group" aria-label="Type filter">
                     {(
                       [
                         { key: "ALL", label: "All" },
