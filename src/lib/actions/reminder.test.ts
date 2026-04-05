@@ -92,6 +92,34 @@ describe("Automated Reminders", () => {
       expect(result.sent).toBe(0);
     });
 
+    it("should not write ReminderLog rows during dry run", async () => {
+      await createReminderConfig({ boardingHouseId: houseId, name: "3 Before", triggerType: "BEFORE_DUE", triggerDays: 3, channel: "EMAIL", templateBody: "Due soon" });
+
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 3);
+      await createInvoice({ tenantId, boardingHouseId: houseId, amount: 3000, type: "RENT", dueDate });
+
+      const result = await processReminders(houseId, { dryRun: true });
+      expect(result.sent).toBe(1);
+
+      const logs = await prisma.reminderLog.findMany();
+      expect(logs).toHaveLength(0);
+    });
+
+    it("should send reminders after a dry run without being blocked", async () => {
+      await createReminderConfig({ boardingHouseId: houseId, name: "3 Before", triggerType: "BEFORE_DUE", triggerDays: 3, channel: "EMAIL", templateBody: "Due soon" });
+
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 3);
+      await createInvoice({ tenantId, boardingHouseId: houseId, amount: 3000, type: "RENT", dueDate });
+
+      const dryResult = await processReminders(houseId, { dryRun: true });
+      expect(dryResult.sent).toBe(1);
+
+      const realResult = await processReminders(houseId);
+      expect(realResult.sent).toBe(dryResult.sent);
+    });
+
     it("skips disabled configs", async () => {
       const config = await createReminderConfig({ boardingHouseId: houseId, name: "Disabled", triggerType: "BEFORE_DUE", triggerDays: 3, channel: "EMAIL", templateBody: "Due" });
       await prisma.reminderConfig.update({ where: { id: config.id }, data: { enabled: false } });
