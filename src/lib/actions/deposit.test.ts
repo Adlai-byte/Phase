@@ -66,4 +66,25 @@ describe("Deposit", () => {
     const result = await refundDeposit(d.id, 1000, "Again");
     expect(result.success).toBe(false);
   });
+
+  it("should track cumulative refunds and reject when exceeding deposit amount", async () => {
+    const d = await createDeposit({ tenantId, boardingHouseId: houseId, amount: 5000, datePaid: new Date() });
+
+    // First partial refund of 3000 — should succeed, status PARTIALLY_REFUNDED
+    const r1 = await refundDeposit(d.id, 3000, "Partial refund #1");
+    expect(r1.success).toBe(true);
+    expect(r1.deposit!.refundStatus).toBe("PARTIALLY_REFUNDED");
+    expect(r1.deposit!.refundAmount).toBe(3000);
+
+    // Second attempt for 3000 — should fail because only 2000 remaining
+    const r2 = await refundDeposit(d.id, 3000, "Partial refund #2");
+    expect(r2.success).toBe(false);
+    expect(r2.error).toContain("exceeds remaining");
+
+    // Third attempt for 2000 (the actual remaining) — should succeed, status FULLY_REFUNDED
+    const r3 = await refundDeposit(d.id, 2000, "Final refund");
+    expect(r3.success).toBe(true);
+    expect(r3.deposit!.refundStatus).toBe("FULLY_REFUNDED");
+    expect(r3.deposit!.refundAmount).toBe(5000);
+  });
 });
