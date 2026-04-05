@@ -34,9 +34,13 @@ export function NotificationBell() {
   }, []);
 
   async function loadNotifications() {
-    const data = await fetchNotifications();
-    setNotifications(data.notifications);
-    setUnreadCount(data.unreadCount);
+    try {
+      const data = await fetchNotifications();
+      setNotifications(data.notifications);
+      setUnreadCount(data.unreadCount);
+    } catch {
+      // Silently fail — bell will show stale/empty state
+    }
   }
 
   async function handleRead(id: string, link?: string | null) {
