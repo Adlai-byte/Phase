@@ -408,6 +408,16 @@ export async function addContract(formData: FormData) {
 
 export async function signContractAction(contractId: string, party: "OWNER" | "TENANT") {
   const user = await requireOwner();
+
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    select: { boardingHouseId: true },
+  });
+  if (!contract) return { success: false, error: "Contract not found" };
+
+  const ownership = await verifyOwnership(user.id, contract.boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
   const { signContract } = await import("@/lib/actions/contract");
   const result = await signContract(contractId, party);
   revalidatePath("/dashboard/contracts");
@@ -416,6 +426,16 @@ export async function signContractAction(contractId: string, party: "OWNER" | "T
 
 export async function terminateContractAction(contractId: string) {
   const user = await requireOwner();
+
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    select: { boardingHouseId: true },
+  });
+  if (!contract) return { success: false, error: "Contract not found" };
+
+  const ownership = await verifyOwnership(user.id, contract.boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
   const { updateContractStatus } = await import("@/lib/actions/contract");
   const result = await updateContractStatus(contractId, "TERMINATED");
   revalidatePath("/dashboard/contracts");
@@ -443,6 +463,16 @@ export async function addDeposit(formData: FormData) {
 
 export async function refundDepositAction(depositId: string, amount: number, reason: string) {
   const user = await requireOwner();
+
+  const deposit = await prisma.deposit.findUnique({
+    where: { id: depositId },
+    select: { boardingHouseId: true },
+  });
+  if (!deposit) return { success: false, error: "Deposit not found" };
+
+  const ownership = await verifyOwnership(user.id, deposit.boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
   const { refundDeposit } = await import("@/lib/actions/deposit");
   return refundDeposit(depositId, amount, reason);
 }
