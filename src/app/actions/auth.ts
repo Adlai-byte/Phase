@@ -25,7 +25,7 @@ async function setSessionCookie(token: string) {
 
 export async function registerAction(formData: FormData) {
   const ip = await getClientIp();
-  const rateCheck = checkRateLimit(`register:${ip}`);
+  const rateCheck = await checkRateLimit(`register:${ip}`);
   if (!rateCheck.allowed) {
     return { success: false, error: "Too many attempts. Please try again later." };
   }
@@ -55,7 +55,7 @@ export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
   const ip = await getClientIp();
 
-  const rateCheck = checkRateLimit(`login:${ip}:${email}`);
+  const rateCheck = await checkRateLimit(`login:${ip}:${email}`);
   if (!rateCheck.allowed) {
     const minutes = Math.ceil((rateCheck.retryAfterMs || 0) / 60000);
     return { success: false, error: `Too many login attempts. Try again in ${minutes} minutes.` };
@@ -69,7 +69,7 @@ export async function loginAction(formData: FormData) {
   }
 
   // Reset rate limit on successful login
-  resetRateLimit(`login:${ip}:${email}`);
+  await resetRateLimit(`login:${ip}:${email}`);
 
   const token = await createToken(result.user!);
   await setSessionCookie(token);

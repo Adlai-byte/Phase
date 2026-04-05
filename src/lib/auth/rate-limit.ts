@@ -1,34 +1,33 @@
-const attempts = new Map<string, { count: number; resetAt: number }>();
+import { prisma } from "@/lib/prisma";
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
-export function checkRateLimit(key: string): { allowed: boolean; retryAfterMs?: number } {
-  const now = Date.now();
-  const record = attempts.get(key);
+export async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterMs?: number }> {
+  const now = new Date();
+
+  const record = await prisma.rateLimit.findUnique({ where: { key } });
 
   if (record && now < record.resetAt) {
     if (record.count >= MAX_ATTEMPTS) {
-      return { allowed: false, retryAfterMs: record.resetAt - now };
+      return { allowed: false, retryAfterMs: record.resetAt.getTime() - now.getTime() };
     }
-    record.count++;
+    await prisma.rateLimit.update({
+      where: { key },
+      data: { count: record.count + 1 },
+    });
     return { allowed: true };
   }
 
-  attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
+  // Create or reset the window
+  await prisma.rateLimit.upsert({
+    where: { key },
+    create: { key, count: 1, resetAt: new Date(now.getTime() + WINDOW_MS) },
+    update: { count: 1, resetAt: new Date(now.getTime() + WINDOW_MS) },
+  });
   return { allowed: true };
 }
 
-export function resetRateLimit(key: string) {
-  attempts.delete(key);
-}
-
-// Cleanup stale entries periodically
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, record] of attempts) {
-      if (now >= record.resetAt) attempts.delete(key);
-    }
-  }, 60_000);
+export async function resetRateLimit(key: string): Promise<void> {
+  await prisma.rateLimit.deleteMany({ where: { key } });
 }
