@@ -6,6 +6,8 @@ import {
   UserPlus,
   Search,
   Eye,
+  Edit,
+  Save,
   MoreHorizontal,
   ChevronLeft,
   X,
@@ -17,7 +19,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { formatCurrency, getInitials, getStatusColor } from "@/lib/utils";
-import { addTenant } from "@/app/actions/dashboard";
+import { addTenant, editTenant } from "@/app/actions/dashboard";
 import { useToast } from "@/components/ui/toast";
 import { TenantProfileModal } from "@/components/ui/tenant-profile-modal";
 
@@ -37,6 +39,9 @@ type Tenant = {
   moveInDate: Date | string;
   room: TenantRoom;
   boardingHouseId: string;
+  tag: string | null;
+  emergencyContact: string | null;
+  emergencyPhone: string | null;
 };
 
 type StatusFilter = "ALL" | "ACTIVE" | "PENDING" | "INACTIVE";
@@ -87,7 +92,21 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
     }
   }
 
+  async function handleEditTenant(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const result = await editTenant(formData);
+    if (result.success) {
+      setEditTenantId(null);
+      toastSuccess("Tenant updated successfully");
+      startTransition(() => { router.refresh(); });
+    } else {
+      toastError(result.error || "Failed to update tenant");
+    }
+  }
+
   const [viewTenantId, setViewTenantId] = useState<string | null>(null);
+  const [editTenantId, setEditTenantId] = useState<string | null>(null);
   const [menuTenantId, setMenuTenantId] = useState<string | null>(null);
 
   const stats = useMemo(
@@ -344,6 +363,13 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
                     >
                       <Eye className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => setEditTenantId(tenant.id)}
+                      className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
+                      title="Edit tenant"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
                     <div className="relative">
                       <button
                         onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
@@ -456,6 +482,13 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
                   title="View tenant"
                 >
                   <Eye className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEditTenantId(tenant.id)}
+                  className="rounded-lg p-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container"
+                  title="Edit tenant"
+                >
+                  <Edit className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setMenuTenantId(menuTenantId === tenant.id ? null : tenant.id)}
@@ -599,6 +632,70 @@ export default function TenantsClient({ tenants, boardingHouseName, boardingHous
           </div>
         </div>
       )}
+
+      {/* Edit Tenant Modal */}
+      {editTenantId && (() => {
+        const editTarget = tenants.find((t) => t.id === editTenantId);
+        if (!editTarget) return null;
+        return (
+          <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setEditTenantId(null); }}>
+            <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setEditTenantId(null)} />
+            <div role="dialog" aria-modal="true" aria-labelledby="modal-title-edit-tenant" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up max-h-[90vh] overflow-y-auto">
+              <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
+                <h2 id="modal-title-edit-tenant" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Edit Tenant</h2>
+                <button onClick={() => setEditTenantId(null)} className="text-on-primary/70 hover:text-on-primary"><X size={20} /></button>
+              </div>
+              <form onSubmit={handleEditTenant} className="p-6 space-y-4">
+                <input type="hidden" name="id" value={editTarget.id} />
+                <div>
+                  <label htmlFor="edit-tenant-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Full Name *</label>
+                  <input id="edit-tenant-name" name="name" type="text" required defaultValue={editTarget.name} className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label htmlFor="edit-tenant-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Phone *</label>
+                  <input id="edit-tenant-phone" name="phone" type="tel" required defaultValue={editTarget.phone} className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <label htmlFor="edit-tenant-email" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Email</label>
+                  <input id="edit-tenant-email" name="email" type="email" defaultValue={editTarget.email || ""} className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div>
+                  <span className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Tenant Type</span>
+                  <div className="flex gap-2" role="radiogroup" aria-label="Tenant Type">
+                    {[
+                      { value: "STUDENT", label: "Student" },
+                      { value: "WORKING_PROFESSIONAL", label: "Working Professional" },
+                      { value: "OTHER", label: "Other" },
+                    ].map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-1.5 text-sm text-on-surface cursor-pointer">
+                        <input type="radio" name="tag" value={opt.value} defaultChecked={editTarget.tag === opt.value} className="accent-primary" />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="edit-tenant-emergency-contact" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Contact</label>
+                    <input id="edit-tenant-emergency-contact" name="emergencyContact" type="text" defaultValue={editTarget.emergencyContact || ""} className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div>
+                    <label htmlFor="edit-tenant-emergency-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Emergency Phone</label>
+                    <input id="edit-tenant-emergency-phone" name="emergencyPhone" type="tel" defaultValue={editTarget.emergencyPhone || ""} className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                </div>
+                <div className="bg-surface-container-low px-6 py-4 -mx-6 -mb-6 mt-4 flex justify-end gap-3 rounded-b-2xl">
+                  <button type="button" onClick={() => setEditTenantId(null)} className="px-5 py-2.5 rounded-full text-sm font-medium text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-colors">Cancel</button>
+                  <button type="submit" disabled={isPending} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 inline-flex items-center gap-2">
+                    <Save size={16} />
+                    {isPending ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Tenant Profile Modal */}
       <TenantProfileModal

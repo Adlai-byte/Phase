@@ -22,6 +22,9 @@ export default async function TenantsPage() {
     moveInDate: t.moveInDate.toISOString(),
     room: t.room,
     boardingHouseId: firstHouse?.id ?? "",
+    tag: t.tag ?? null,
+    emergencyContact: t.emergencyContact ?? null,
+    emergencyPhone: t.emergencyPhone ?? null,
   }));
 
   return (
