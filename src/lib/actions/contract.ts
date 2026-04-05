@@ -50,6 +50,10 @@ export async function signContract(contractId: string, party: "OWNER" | "TENANT"
   const contract = await prisma.contract.findUnique({ where: { id: contractId } });
   if (!contract) throw new Error("Contract not found");
 
+  if (contract.status !== "DRAFT") {
+    throw new Error(`Cannot sign a contract in ${contract.status} status`);
+  }
+
   const data: Record<string, unknown> = {};
   if (party === "OWNER") data.signedByOwner = true;
   if (party === "TENANT") data.signedByTenant = true;

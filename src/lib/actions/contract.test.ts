@@ -81,4 +81,20 @@ describe("Contract", () => {
     const result = await updateContractStatus(c.id, "TERMINATED");
     expect(result.success).toBe(false);
   });
+
+  it("should reject signing a TERMINATED contract", async () => {
+    const c = await createContract({ tenantId, boardingHouseId: houseId, startDate: new Date("2026-04-01"), endDate: new Date("2027-04-01"), monthlyRate: 3000 });
+    await signContract(c.id, "OWNER");
+    await signContract(c.id, "TENANT");
+    await updateContractStatus(c.id, "TERMINATED");
+    await expect(signContract(c.id, "OWNER")).rejects.toThrow("Cannot sign");
+  });
+
+  it("should reject signing an EXPIRED contract", async () => {
+    const c = await createContract({ tenantId, boardingHouseId: houseId, startDate: new Date("2026-04-01"), endDate: new Date("2027-04-01"), monthlyRate: 3000 });
+    await signContract(c.id, "OWNER");
+    await signContract(c.id, "TENANT");
+    await updateContractStatus(c.id, "EXPIRED");
+    await expect(signContract(c.id, "OWNER")).rejects.toThrow("Cannot sign");
+  });
 });
