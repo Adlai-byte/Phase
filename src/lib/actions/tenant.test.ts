@@ -71,6 +71,26 @@ describe("Tenant Management", () => {
       expect(result.success).toBe(true);
       expect(result.tenant!.roomId).toBeNull();
     });
+
+    it("rejects room from a different boarding house", async () => {
+      const hash = await hashPassword("test123456");
+      const otherOwner = await prisma.user.create({
+        data: { name: "Other Owner", email: "other@test.com", password: hash, role: "OWNER" },
+      });
+      const otherHouse = await createBoardingHouse({
+        name: "Other House", address: "Other Addr", type: "MIXED", ownerId: otherOwner.id,
+      });
+      const otherRoom = await createRoom({
+        number: "201", floor: 1, capacity: 2, monthlyRate: 3000, boardingHouseId: otherHouse.boardingHouse!.id,
+      });
+
+      const result = await createTenant({
+        name: "Maria", phone: "0917-000-0000", boardingHouseId: houseId, roomId: otherRoom.room!.id,
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("does not belong");
+    });
   });
 
   describe("getTenants", () => {

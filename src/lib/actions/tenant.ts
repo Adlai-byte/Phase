@@ -20,6 +20,20 @@ export async function createTenant(input: z.infer<typeof createTenantSchema>) {
 
   const { boardingHouseId, roomId, ...data } = parsed.data;
 
+  // Verify room belongs to the same boarding house
+  if (roomId) {
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+      select: { boardingHouseId: true, status: true },
+    });
+    if (!room || room.boardingHouseId !== boardingHouseId) {
+      return { success: false as const, error: "Room does not belong to this property" };
+    }
+    if (room.status !== "AVAILABLE") {
+      return { success: false as const, error: "Room is not available" };
+    }
+  }
+
   const tenant = await prisma.$transaction(async (tx) => {
     const created = await tx.tenant.create({
       data: {
