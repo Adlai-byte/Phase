@@ -59,5 +59,17 @@ describe("Data Export", () => {
       expect(csv).toContain("0917-111-0000");
       expect(csv).toContain("Room 101");
     });
+
+    it("escapes fields containing commas and formula injection characters", async () => {
+      await createTenant({ name: "Smith, John", phone: "0917-222-0000", email: "smith@test.com", boardingHouseId: houseId });
+      await createTenant({ name: "=CMD|'/c calc'!A0", phone: "0917-333-0000", email: "evil@test.com", boardingHouseId: houseId });
+
+      const csv = await exportTenantsCSV(houseId);
+
+      // Comma in name must be quoted
+      expect(csv).toContain('"Smith, John"');
+      // Formula injection must be quoted
+      expect(csv).toContain('"=CMD|\'/c calc\'!A0"');
+    });
   });
 });
