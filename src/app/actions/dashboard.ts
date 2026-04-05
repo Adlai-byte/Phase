@@ -476,3 +476,34 @@ export async function refundDepositAction(depositId: string, amount: number, rea
   const { refundDeposit } = await import("@/lib/actions/deposit");
   return refundDeposit(depositId, amount, reason);
 }
+
+// ── Settings Actions ──────────────────────────────────────
+
+export async function updateProfileAction(formData: FormData) {
+  const user = await requireOwner();
+  const { updateUser } = await import("@/lib/actions/user");
+  const result = await updateUser(user.id, {
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    phone: (formData.get("phone") as string) || undefined,
+  });
+  if (result.success) {
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/settings");
+  }
+  return result;
+}
+
+export async function changePasswordAction(formData: FormData) {
+  const user = await requireOwner();
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  if (newPassword !== confirmPassword) {
+    return { success: false, error: "New passwords do not match" };
+  }
+
+  const { changePassword } = await import("@/lib/auth/change-password");
+  return changePassword(user.id, currentPassword, newPassword);
+}
