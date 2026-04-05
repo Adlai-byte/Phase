@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
@@ -14,6 +14,7 @@ import {
   Receipt,
   FileText,
   ArrowLeftRight,
+  AlertCircle,
   Settings,
   Search,
   Bell,
@@ -30,6 +31,8 @@ const navItems = [
   { label: "Billing", href: "/dashboard/billing", icon: Receipt },
   { label: "Invoices", href: "/dashboard/invoices", icon: FileText },
   { label: "Room Transfer", href: "/dashboard/transfers", icon: ArrowLeftRight },
+  { label: "Contracts", href: "/dashboard/contracts", icon: FileText },
+  { label: "Overdue", href: "/dashboard/overdue", icon: AlertCircle },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -225,11 +228,34 @@ export default function DashboardLayout({
           </div>
         </header>
 
+        {/* Impersonation Banner */}
+        <ImpersonationBanner />
+
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <ToastProvider>{children}</ToastProvider>
         </main>
       </div>
+    </div>
+  );
+}
+
+function ImpersonationBanner() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    // phase-impersonate is httpOnly so we check via API
+    fetch("/api/impersonation-check").then(r => r.json()).then(d => setShow(d.impersonating)).catch(() => {});
+  }, []);
+  if (!show) return null;
+  return (
+    <div className="bg-tertiary text-on-tertiary px-4 py-2 flex items-center justify-between text-sm">
+      <span className="font-medium">You are viewing as this owner (admin impersonation)</span>
+      <button onClick={async () => {
+        const { stopImpersonation } = await import("@/app/actions/auth");
+        await stopImpersonation();
+      }} className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold hover:bg-white/30 transition-colors">
+        Return to Admin
+      </button>
     </div>
   );
 }

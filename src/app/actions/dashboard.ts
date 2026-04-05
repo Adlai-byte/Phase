@@ -383,3 +383,66 @@ export async function sendInvoice(invoiceId: string, channel: "EMAIL" | "SMS" | 
   if (result.success) revalidatePath("/dashboard/invoices");
   return result;
 }
+
+// ── Contract Actions ──────────────────────────────────────
+
+export async function addContract(formData: FormData) {
+  const user = await requireOwner();
+  const boardingHouseId = formData.get("boardingHouseId") as string;
+  const ownership = await verifyOwnership(user.id, boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
+  const { createContract } = await import("@/lib/actions/contract");
+  const contract = await createContract({
+    tenantId: formData.get("tenantId") as string,
+    boardingHouseId,
+    startDate: new Date(formData.get("startDate") as string),
+    endDate: new Date(formData.get("endDate") as string),
+    monthlyRate: Number(formData.get("monthlyRate")),
+    depositAmount: Number(formData.get("depositAmount") || 0) || undefined,
+    terms: (formData.get("terms") as string) || undefined,
+  });
+  revalidatePath("/dashboard/contracts");
+  return { success: true, contract };
+}
+
+export async function signContractAction(contractId: string, party: "OWNER" | "TENANT") {
+  const user = await requireOwner();
+  const { signContract } = await import("@/lib/actions/contract");
+  const result = await signContract(contractId, party);
+  revalidatePath("/dashboard/contracts");
+  return result;
+}
+
+export async function terminateContractAction(contractId: string) {
+  const user = await requireOwner();
+  const { updateContractStatus } = await import("@/lib/actions/contract");
+  const result = await updateContractStatus(contractId, "TERMINATED");
+  revalidatePath("/dashboard/contracts");
+  return result;
+}
+
+// ── Deposit Actions ──────────────────────────────────────
+
+export async function addDeposit(formData: FormData) {
+  const user = await requireOwner();
+  const boardingHouseId = formData.get("boardingHouseId") as string;
+  const ownership = await verifyOwnership(user.id, boardingHouseId);
+  if (!ownership.allowed) return { success: false, error: ownership.error };
+
+  const { createDeposit } = await import("@/lib/actions/deposit");
+  const deposit = await createDeposit({
+    tenantId: formData.get("tenantId") as string,
+    boardingHouseId,
+    amount: Number(formData.get("amount")),
+    datePaid: new Date(formData.get("datePaid") as string),
+    conditions: (formData.get("conditions") as string) || undefined,
+  });
+  return { success: true, deposit };
+}
+
+export async function refundDepositAction(depositId: string, amount: number, reason: string) {
+  const user = await requireOwner();
+  const { refundDeposit } = await import("@/lib/actions/deposit");
+  return refundDeposit(depositId, amount, reason);
+}

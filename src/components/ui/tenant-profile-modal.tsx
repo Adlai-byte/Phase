@@ -71,7 +71,7 @@ export function TenantProfileModal({
 }) {
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "payments" | "history">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "payments" | "deposits" | "history">("overview");
 
   useEffect(() => {
     if (!open || !tenantId) return;
@@ -89,6 +89,7 @@ export function TenantProfileModal({
   const tabs = [
     { key: "overview" as const, label: "Overview" },
     { key: "payments" as const, label: `Payments (${profile?.invoices.length || 0})` },
+    { key: "deposits" as const, label: `Deposits (${(profile as any)?.deposits?.length || 0})` },
     { key: "history" as const, label: `History (${profile?.transfers.length || 0})` },
   ];
 
@@ -232,6 +233,41 @@ export function TenantProfileModal({
                         </p>
                       </div>
                       <p className="text-sm font-bold text-on-surface shrink-0">{formatCurrency(inv.amount)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === "deposits" && (
+                <div className="space-y-2">
+                  {!(profile as any)?.deposits?.length ? (
+                    <p className="text-sm text-on-surface-variant text-center py-8">No deposits recorded</p>
+                  ) : (profile as any).deposits.map((d: any) => (
+                    <div key={d.id} className="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        d.refundStatus === "HELD" ? "bg-primary-fixed text-primary" :
+                        d.refundStatus === "FULLY_REFUNDED" ? "bg-success-container text-success" :
+                        d.refundStatus === "FORFEITED" ? "bg-error-container text-error" :
+                        "bg-tertiary-fixed text-tertiary"
+                      }`}>
+                        <Shield size={14} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-on-surface">{formatCurrency(d.amount)}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                            d.refundStatus === "HELD" ? "bg-primary-fixed text-primary" :
+                            d.refundStatus === "FULLY_REFUNDED" ? "bg-success-container text-success" :
+                            d.refundStatus === "FORFEITED" ? "bg-error-container text-error" :
+                            "bg-tertiary-fixed text-tertiary"
+                          }`}>{d.refundStatus.replace("_", " ")}</span>
+                        </div>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">
+                          Paid {formatDate(d.datePaid)}
+                          {d.refundAmount && ` · Refunded ${formatCurrency(d.refundAmount)}`}
+                        </p>
+                        {d.conditions && <p className="text-[10px] text-outline mt-0.5">{d.conditions}</p>}
+                      </div>
                     </div>
                   ))}
                 </div>

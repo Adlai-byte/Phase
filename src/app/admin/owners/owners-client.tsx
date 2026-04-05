@@ -337,8 +337,11 @@ export default function OwnersClient({ owners }: { owners: Owner[] }) {
                     </>
                   )}
                   {selectedOwnerData.verified && (
-                    <button onClick={() => alert("Full profile view coming soon")} className="flex-1 py-2.5 rounded-full text-xs font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-                      View Full Profile
+                    <button onClick={async () => {
+                      const { impersonateOwner } = await import("@/app/actions/auth");
+                      await impersonateOwner(selectedOwnerData.id);
+                    }} className="flex-1 py-2.5 rounded-full text-xs font-medium gradient-primary text-on-primary hover:opacity-90 transition-opacity">
+                      View as Owner
                     </button>
                   )}
                 </div>

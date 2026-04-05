@@ -33,6 +33,31 @@ export async function getTenantProfile(tenantId: string) {
         },
         orderBy: { createdAt: "desc" },
       },
+      deposits: {
+        select: {
+          id: true,
+          amount: true,
+          datePaid: true,
+          refundStatus: true,
+          refundAmount: true,
+          refundDate: true,
+          refundReason: true,
+          conditions: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
+      contracts: {
+        select: {
+          id: true,
+          startDate: true,
+          endDate: true,
+          monthlyRate: true,
+          status: true,
+          signedByOwner: true,
+          signedByTenant: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 
@@ -54,6 +79,8 @@ export async function getTenantProfile(tenantId: string) {
     boardingHouse: tenant.boardingHouse,
     invoices: tenant.invoices,
     transfers: tenant.transfers,
+    deposits: tenant.deposits,
+    contracts: tenant.contracts,
     totalPaid: tenant.invoices
       .filter((i) => i.status === "PAID")
       .reduce((sum, i) => sum + i.amount, 0),

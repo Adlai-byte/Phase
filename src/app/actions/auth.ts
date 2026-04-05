@@ -81,5 +81,37 @@ export async function loginAction(formData: FormData) {
 export async function logoutAction() {
   const cookieStore = await cookies();
   cookieStore.delete("phase-session");
+  cookieStore.delete("phase-impersonate");
   redirect("/login");
+}
+
+export async function impersonateOwner(ownerId: string) {
+  const { getCurrentUser } = await import("@/lib/auth/get-user");
+  const user = await getCurrentUser();
+  if (!user || user.role !== "SUPERADMIN") return { success: false, error: "Not authorized" };
+
+  const { prisma } = await import("@/lib/prisma");
+  const owner = await prisma.user.findUnique({ where: { id: ownerId }, select: { id: true, email: true, name: true, role: true } });
+  if (!owner || owner.role !== "OWNER") return { success: false, error: "Owner not found" };
+
+  const { createToken } = await import("@/lib/auth/session");
+  const token = await createToken({ id: owner.id, email: owner.email, name: owner.name, role: owner.role });
+  const cookieStore = await cookies();
+  // Save admin session for return
+  const adminToken = cookieStore.get("phase-session")?.value;
+  if (adminToken) {
+    cookieStore.set("phase-impersonate", adminToken, { httpOnly: true, sameSite: "lax", maxAge: 60 * 60, path: "/" });
+  }
+  await setSessionCookie(token);
+  redirect("/dashboard");
+}
+
+export async function stopImpersonation() {
+  const cookieStore = await cookies();
+  const adminToken = cookieStore.get("phase-impersonate")?.value;
+  if (adminToken) {
+    cookieStore.set("phase-session", adminToken, { httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 7, path: "/" });
+    cookieStore.delete("phase-impersonate");
+  }
+  redirect("/admin");
 }
