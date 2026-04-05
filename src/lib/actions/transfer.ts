@@ -49,26 +49,37 @@ export async function approveTransfer(transferId: string) {
     return { success: false as const, error: "Transfer is not in pending status" };
   }
 
-  const updated = await prisma.$transaction(async (tx) => {
-    await tx.tenant.update({
-      where: { id: transfer.tenantId },
-      data: { roomId: transfer.toRoomId },
-    });
-    await tx.room.update({
-      where: { id: transfer.fromRoomId },
-      data: { status: "AVAILABLE" },
-    });
-    await tx.room.update({
-      where: { id: transfer.toRoomId },
-      data: { status: "OCCUPIED" },
-    });
-    return tx.roomTransfer.update({
-      where: { id: transferId },
-      data: { status: "COMPLETED", transferDate: new Date() },
-    });
-  });
+  try {
+    const updated = await prisma.$transaction(async (tx) => {
+      // Re-verify target room is still available inside the transaction
+      const toRoom = await tx.room.findUnique({ where: { id: transfer.toRoomId } });
+      if (!toRoom || toRoom.status !== "AVAILABLE") {
+        throw new Error("Target room is no longer available");
+      }
 
-  return { success: true as const, transfer: updated };
+      await tx.tenant.update({
+        where: { id: transfer.tenantId },
+        data: { roomId: transfer.toRoomId },
+      });
+      await tx.room.update({
+        where: { id: transfer.fromRoomId },
+        data: { status: "AVAILABLE" },
+      });
+      await tx.room.update({
+        where: { id: transfer.toRoomId },
+        data: { status: "OCCUPIED" },
+      });
+      return tx.roomTransfer.update({
+        where: { id: transferId },
+        data: { status: "COMPLETED", transferDate: new Date() },
+      });
+    });
+
+    return { success: true as const, transfer: updated };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Transfer failed";
+    return { success: false as const, error: message };
+  }
 }
 
 export async function cancelTransfer(transferId: string) {
