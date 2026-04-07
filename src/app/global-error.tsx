@@ -8,7 +8,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html>
+    <html lang="en">
       <body style={{ margin: 0, fontFamily: "Inter, sans-serif", background: "#f7f9fc" }}>
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
           <div style={{ textAlign: "center", maxWidth: "400px" }}>

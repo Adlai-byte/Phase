@@ -540,27 +540,27 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
 
       {/* Add Room Modal */}
       {showAddRoomModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddRoomModal(false)} />
-          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddRoomModal(false); }}>
+          <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddRoomModal(false)} />
+          <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-room" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-md animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Room</h2>
+              <h2 id="modal-title-add-room" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">Add New Room</h2>
               <button onClick={() => setShowAddRoomModal(false)} className="text-on-primary/70 hover:text-on-primary"><X size={20} /></button>
             </div>
             <form onSubmit={handleAddRoom} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Number *</label>
-                  <input name="number" type="text" required placeholder="e.g. 101" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-room-number" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Number *</label>
+                  <input id="field-room-number" name="number" type="text" required placeholder="e.g. 101" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Floor *</label>
-                  <input name="floor" type="number" required min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-room-floor" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Floor *</label>
+                  <input id="field-room-floor" name="floor" type="number" required min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Type *</label>
-                <select name="roomType" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
+                <label htmlFor="field-room-type" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Room Type *</label>
+                <select id="field-room-type" name="roomType" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
                   <option value="BEDSPACER">Bedspacer</option>
                   <option value="SOLO_ROOM">Solo Room</option>
                   <option value="DUAL_BED">Dual Bed</option>
@@ -571,17 +571,17 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Monthly Rate (₱) *</label>
-                  <input name="monthlyRate" type="number" required min="1" placeholder="3000" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-room-monthly-rate" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Monthly Rate (₱) *</label>
+                  <input id="field-room-monthly-rate" name="monthlyRate" type="number" required min="1" placeholder="3000" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Capacity</label>
-                  <input name="capacity" type="number" min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <label htmlFor="field-room-capacity" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Capacity</label>
+                  <input id="field-room-capacity" name="capacity" type="number" min="1" defaultValue="1" className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide">Amenities</label>
-                <div className="grid grid-cols-2 gap-2">
+                <span className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide">Amenities</span>
+                <div className="grid grid-cols-2 gap-2" role="group" aria-label="Amenities">
                   <label className="flex items-center gap-2 text-sm text-on-surface cursor-pointer">
                     <input name="hasAircon" type="checkbox" className="accent-primary" /> Air Conditioning
                   </label>
@@ -610,11 +610,11 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
 
       {/* Add Property Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
-          <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowAddModal(false); }}>
+          <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div role="dialog" aria-modal="true" aria-labelledby="modal-title-add-property" className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
+              <h2 id="modal-title-add-property" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
                 Add New Property
               </h2>
               <button onClick={() => setShowAddModal(false)} className="text-on-primary/70 hover:text-on-primary">
@@ -623,19 +623,19 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
             </div>
             <form onSubmit={handleAddProperty} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Property Name *</label>
-                <input name="name" type="text" required placeholder="e.g. Casa Marina Residences"
+                <label htmlFor="field-property-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Property Name *</label>
+                <input id="field-property-name" name="name" type="text" required placeholder="e.g. Casa Marina Residences"
                   className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Address *</label>
-                <input name="address" type="text" required placeholder="e.g. Brgy. Sainz, Mati City"
+                <label htmlFor="field-property-address" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Address *</label>
+                <input id="field-property-address" name="address" type="text" required placeholder="e.g. Brgy. Sainz, Mati City"
                   className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Type *</label>
-                  <select name="type" required
+                  <label htmlFor="field-property-type" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Type *</label>
+                  <select id="field-property-type" name="type" required
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none">
                     <option value="MIXED">Mixed</option>
                     <option value="ALL_FEMALE">All Female</option>
@@ -643,27 +643,27 @@ export default function PropertiesClient({ houses, rooms }: PropertiesClientProp
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Curfew Time</label>
-                  <input name="curfewTime" type="time"
+                  <label htmlFor="field-property-curfew-time" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Curfew Time</label>
+                  <input id="field-property-curfew-time" name="curfewTime" type="time"
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Description</label>
-                <textarea name="description" rows={3} placeholder="Describe your boarding house..."
+                <label htmlFor="field-property-description" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Description</label>
+                <textarea id="field-property-description" name="description" rows={3} placeholder="Describe your boarding house..."
                   className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none" />
               </div>
               <ChipSelector label="Amenities" name="amenities" options={AMENITY_OPTIONS} />
               <ChipSelector label="Restrictions" name="restrictions" options={RESTRICTION_OPTIONS} />
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Phone</label>
-                  <input name="contactPhone" type="tel" placeholder="0917-xxx-xxxx"
+                  <label htmlFor="field-property-contact-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Phone</label>
+                  <input id="field-property-contact-phone" name="contactPhone" type="tel" placeholder="0917-xxx-xxxx"
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Email</label>
-                  <input name="contactEmail" type="email" placeholder="you@email.com"
+                  <label htmlFor="field-property-contact-email" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">Contact Email</label>
+                  <input id="field-property-contact-email" name="contactEmail" type="email" placeholder="you@email.com"
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                 </div>
               </div>

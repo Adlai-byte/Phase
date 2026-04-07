@@ -486,20 +486,22 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
       {activeTab === "Settings" && (
         <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_10px_30px_-5px_rgba(24,28,30,0.04)] space-y-5 max-w-2xl">
           <div>
-            <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+            <label htmlFor="field-property-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
               Property Name
             </label>
             <input
+              id="field-property-name"
               type="text"
               defaultValue={house.name}
               className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+            <label htmlFor="field-property-address" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
               Address
             </label>
             <input
+              id="field-property-address"
               type="text"
               defaultValue={`${house.address}, ${house.city}`}
               className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -507,10 +509,11 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+              <label htmlFor="field-property-type" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                 Type
               </label>
               <select
+                id="field-property-type"
                 defaultValue={house.type}
                 className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
               >
@@ -520,10 +523,11 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+              <label htmlFor="field-property-curfew" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                 Curfew Time
               </label>
               <input
+                id="field-property-curfew"
                 type="time"
                 defaultValue={house.curfewTime || "22:00"}
                 className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -531,10 +535,11 @@ export default function PropertyDetailClient({ house, rooms }: PropertyDetailCli
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+            <label htmlFor="field-property-description" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
               Description
             </label>
             <textarea
+              id="field-property-description"
               rows={4}
               defaultValue={house.description || ""}
               className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"

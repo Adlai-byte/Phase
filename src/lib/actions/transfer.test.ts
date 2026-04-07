@@ -84,6 +84,17 @@ describe("Room Transfers", () => {
       expect(newRoom!.status).toBe("OCCUPIED");
     });
 
+    it("should reject approval if target room is no longer available", async () => {
+      const req = await createTransfer({ tenantId, fromRoomId, toRoomId, reason: "Upgrade" });
+
+      // Simulate another operation marking the target room as OCCUPIED
+      await prisma.room.update({ where: { id: toRoomId }, data: { status: "OCCUPIED" } });
+
+      const result = await approveTransfer(req.transfer!.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain("no longer available");
+    });
+
     it("rejects approving already completed transfer", async () => {
       const req = await createTransfer({ tenantId, fromRoomId, toRoomId, reason: "Test" });
       await approveTransfer(req.transfer!.id);

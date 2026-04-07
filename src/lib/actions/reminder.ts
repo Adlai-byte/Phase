@@ -102,18 +102,17 @@ export async function processReminders(
 
       if (!options?.dryRun) {
         // Real send via email/SMS services would go here
-        // For now, just log
-      }
 
-      // Log the send
-      await prisma.reminderLog.create({
-        data: {
-          status: "SENT",
-          channel: config.channel,
-          invoiceId: invoice.id,
-          reminderConfigId: config.id,
-        },
-      });
+        // Log the send
+        await prisma.reminderLog.create({
+          data: {
+            status: "SENT",
+            channel: config.channel,
+            invoiceId: invoice.id,
+            reminderConfigId: config.id,
+          },
+        });
+      }
 
       sent++;
     }

@@ -95,7 +95,7 @@ export function TenantProfileModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={onClose} />
+      <div role="presentation" className="absolute inset-0 bg-primary/20 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_-8px_rgba(24,28,30,0.12)] w-full max-w-2xl max-h-[85vh] overflow-hidden animate-slide-up flex flex-col">
         {/* Header */}
         <div className="gradient-primary px-6 py-4 flex items-center justify-between shrink-0">

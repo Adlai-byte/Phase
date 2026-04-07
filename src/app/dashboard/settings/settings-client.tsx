@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   User,
   Building2,
@@ -15,7 +15,10 @@ import {
   ChevronRight,
   Check,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getInitials } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
+import { updateProfileAction, changePasswordAction } from "@/app/actions/dashboard";
 
 type Subscription = {
   plan: string;
@@ -64,6 +67,9 @@ function formatAmount(amount: number): string {
 
 export default function SettingsClient({ user }: SettingsClientProps) {
   const [activeTab, setActiveTab] = useState("profile");
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const { toast } = useToast();
 
   const tabs = [
     { key: "profile", label: "Profile", icon: User },
@@ -151,63 +157,85 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-                      />
-                      <input
-                        type="text"
-                        defaultValue={user.name}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
+                <form
+                  onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+                    e.preventDefault();
+                    startTransition(async () => {
+                      const fd = new FormData(e.currentTarget);
+                      const result = await updateProfileAction(fd);
+                      if (result.success) {
+                        toast("Profile updated successfully", "success");
+                        router.refresh();
+                      } else {
+                        toast(result.error || "Failed to update profile", "error");
+                      }
+                    });
+                  }}
+                >
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="field-settings-name" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <User
+                          size={16}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                        />
+                        <input
+                          id="field-settings-name"
+                          name="name"
+                          type="text"
+                          defaultValue={user.name}
+                          className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="field-settings-email" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                        Email
+                      </label>
+                      <div className="relative">
+                        <Mail
+                          size={16}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                        />
+                        <input
+                          id="field-settings-email"
+                          name="email"
+                          type="email"
+                          defaultValue={user.email}
+                          className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="field-settings-phone" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                        Phone
+                      </label>
+                      <div className="relative">
+                        <Phone
+                          size={16}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
+                        />
+                        <input
+                          id="field-settings-phone"
+                          name="phone"
+                          type="tel"
+                          defaultValue={user.phone || ""}
+                          className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
-                      Email
-                    </label>
-                    <div className="relative">
-                      <Mail
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-                      />
-                      <input
-                        type="email"
-                        defaultValue={user.email}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
-                      Phone
-                    </label>
-                    <div className="relative">
-                      <Phone
-                        size={16}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-                      />
-                      <input
-                        type="tel"
-                        defaultValue={user.phone || ""}
-                        className="w-full pl-10 pr-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex justify-end">
-                  <button onClick={() => alert("Profile updated (demo)")} className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2">
-                    <Save size={16} />
-                    Save Changes
-                  </button>
-                </div>
+                  <div className="flex justify-end mt-6">
+                    <button type="submit" disabled={isPending} className="gradient-primary text-on-primary px-6 py-2.5 rounded-full font-medium text-sm inline-flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60">
+                      <Save size={16} />
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
@@ -276,8 +304,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                       </span>
                     </p>
                   </div>
-                  <button onClick={() => alert("Plan upgrade coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-                    Change Plan
+                  <button disabled className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant opacity-60 cursor-not-allowed">
+                    Change Plan (Coming Soon)
                   </button>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3">
@@ -309,26 +337,45 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                   <h3 className="text-sm font-semibold text-on-surface mb-3">
                     Change Password
                   </h3>
-                  <div className="space-y-3 max-w-md">
+                  <form
+                    className="space-y-3 max-w-md"
+                    onSubmit={async (e: React.FormEvent<HTMLFormElement>) => {
+                      e.preventDefault();
+                      const form = e.currentTarget;
+                      startTransition(async () => {
+                        const fd = new FormData(form);
+                        const result = await changePasswordAction(fd);
+                        if (result.success) {
+                          toast("Password updated successfully", "success");
+                          form.reset();
+                        } else {
+                          toast(result.error || "Failed to update password", "error");
+                        }
+                      });
+                    }}
+                  >
                     <input
+                      name="currentPassword"
                       type="password"
                       placeholder="Current password"
                       className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     <input
+                      name="newPassword"
                       type="password"
                       placeholder="New password"
                       className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     <input
+                      name="confirmPassword"
                       type="password"
                       placeholder="Confirm new password"
                       className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <button onClick={() => alert("Password updated (demo)")} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity">
+                    <button type="submit" disabled={isPending} className="gradient-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-60">
                       Update Password
                     </button>
-                  </div>
+                  </form>
                 </div>
                 <div className="pt-4">
                   <h3 className="text-sm font-semibold text-on-surface mb-1">
@@ -337,8 +384,8 @@ export default function SettingsClient({ user }: SettingsClientProps) {
                   <p className="text-xs text-on-surface-variant mb-3">
                     Add an extra layer of security to your account
                   </p>
-                  <button onClick={() => alert("2FA setup coming soon")} className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest transition-colors">
-                    Enable 2FA
+                  <button disabled className="px-5 py-2.5 rounded-full text-sm font-medium bg-surface-container-high text-on-surface-variant opacity-60 cursor-not-allowed">
+                    Enable 2FA (Coming Soon)
                   </button>
                 </div>
               </div>

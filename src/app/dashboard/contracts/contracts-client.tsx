@@ -449,14 +449,15 @@ export default function ContractsClient({
 
       {/* Create Contract Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div role="presentation" className="fixed inset-0 z-50 flex items-center justify-center p-4" onKeyDown={(e) => { if (e.key === "Escape") setShowCreateModal(false); }}>
           <div
+            role="presentation"
             className="absolute inset-0 bg-primary/20 backdrop-blur-sm"
             onClick={() => setShowCreateModal(false)}
           />
-          <div className="relative bg-surface-container-lowest rounded-2xl shadow-elevated w-full max-w-lg overflow-hidden animate-slide-up">
+          <div role="dialog" aria-modal="true" aria-labelledby="modal-title-create-contract" className="relative bg-surface-container-lowest rounded-2xl shadow-elevated w-full max-w-lg overflow-hidden animate-slide-up">
             <div className="gradient-primary px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
+              <h2 id="modal-title-create-contract" className="text-lg font-semibold font-[family-name:var(--font-display)] text-on-primary">
                 Create Contract
               </h2>
               <button
@@ -469,10 +470,11 @@ export default function ContractsClient({
             <form onSubmit={handleCreateContract}>
               <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <label htmlFor="field-contract-tenant" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Tenant
                   </label>
                   <select
+                    id="field-contract-tenant"
                     name="tenantId"
                     required
                     className="w-full px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
@@ -488,10 +490,11 @@ export default function ContractsClient({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-contract-start-date" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Start Date
                     </label>
                     <input
+                      id="field-contract-start-date"
                       type="date"
                       name="startDate"
                       required
@@ -499,10 +502,11 @@ export default function ContractsClient({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-contract-end-date" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       End Date
                     </label>
                     <input
+                      id="field-contract-end-date"
                       type="date"
                       name="endDate"
                       required
@@ -513,10 +517,11 @@ export default function ContractsClient({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-contract-monthly-rate" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Monthly Rate
                     </label>
                     <input
+                      id="field-contract-monthly-rate"
                       type="number"
                       name="monthlyRate"
                       required
@@ -527,10 +532,11 @@ export default function ContractsClient({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label htmlFor="field-contract-deposit-amount" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                       Deposit Amount
                     </label>
                     <input
+                      id="field-contract-deposit-amount"
                       type="number"
                       name="depositAmount"
                       min="0"
@@ -542,10 +548,11 @@ export default function ContractsClient({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
+                  <label htmlFor="field-contract-terms" className="block text-xs font-medium text-on-surface-variant uppercase tracking-wide mb-1.5">
                     Terms & Conditions
                   </label>
                   <textarea
+                    id="field-contract-terms"
                     name="terms"
                     rows={4}
                     placeholder="Enter contract terms and conditions..."

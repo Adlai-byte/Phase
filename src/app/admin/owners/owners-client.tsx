@@ -190,7 +190,10 @@ export default function OwnersClient({ owners }: { owners: Owner[] }) {
               return (
                 <div
                   key={owner.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedOwner(owner.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedOwner(owner.id); } }}
                   className={`px-5 py-4 hover:bg-surface-container-low transition-colors cursor-pointer ${
                     selectedOwner === owner.id ? "bg-primary-fixed/20" : ""
                   }`}

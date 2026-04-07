@@ -238,6 +238,7 @@ export default function BroadcastsClient({
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
+            role="presentation"
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowModal(false)}
           />
@@ -258,10 +259,11 @@ export default function BroadcastsClient({
             {/* Modal body */}
             <form action={handleCreate} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                <label htmlFor="field-broadcast-title" className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                   Title
                 </label>
                 <input
+                  id="field-broadcast-title"
                   name="title"
                   required
                   placeholder="Broadcast title..."
@@ -270,10 +272,11 @@ export default function BroadcastsClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                <label htmlFor="field-broadcast-message" className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                   Message
                 </label>
                 <textarea
+                  id="field-broadcast-message"
                   name="message"
                   required
                   rows={4}
@@ -284,10 +287,11 @@ export default function BroadcastsClient({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                  <label htmlFor="field-broadcast-type" className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                     Type
                   </label>
                   <select
+                    id="field-broadcast-type"
                     name="type"
                     defaultValue="INFO"
                     className="w-full px-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -299,10 +303,11 @@ export default function BroadcastsClient({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                  <label htmlFor="field-broadcast-target-plan" className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                     Target Plan
                   </label>
                   <select
+                    id="field-broadcast-target-plan"
                     name="targetPlan"
                     defaultValue=""
                     className="w-full px-4 py-3 bg-surface-container rounded-xl text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"

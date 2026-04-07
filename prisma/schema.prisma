@@ -334,6 +334,15 @@ model ReminderLog {
   @@index([reminderConfigId])
 }
 
+model RateLimit {
+  id       String   @id @default(cuid())
+  key      String   @unique
+  count    Int      @default(0)
+  resetAt  DateTime
+
+  @@index([key])
+}
+
 model Subscription {
   id          String   @id @default(cuid())
   plan        String   @default("STARTER")

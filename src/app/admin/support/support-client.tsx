@@ -379,10 +379,11 @@ export default function SupportClient({
                           ) : (
                             <div className="space-y-3">
                               <div>
-                                <label className="block text-xs font-semibold text-on-surface-variant mb-1.5">
+                                <label htmlFor="field-support-response" className="block text-xs font-semibold text-on-surface-variant mb-1.5">
                                   Response
                                 </label>
                                 <textarea
+                                  id="field-support-response"
                                   value={responseText}
                                   onChange={(e) =>
                                     setResponseText(e.target.value)

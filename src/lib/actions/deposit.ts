@@ -38,17 +38,21 @@ export async function refundDeposit(depositId: string, refundAmount: number, rea
     return { success: false as const, error: "Deposit already settled" };
   }
 
-  if (refundAmount > deposit.amount) {
-    return { success: false as const, error: "Refund amount cannot exceed deposit amount" };
+  const alreadyRefunded = deposit.refundAmount || 0;
+  const remaining = deposit.amount - alreadyRefunded;
+
+  if (refundAmount > remaining) {
+    return { success: false as const, error: `Refund amount exceeds remaining balance (${remaining})` };
   }
 
-  const status = refundAmount >= deposit.amount ? "FULLY_REFUNDED" : "PARTIALLY_REFUNDED";
+  const newTotal = alreadyRefunded + refundAmount;
+  const status = newTotal >= deposit.amount ? "FULLY_REFUNDED" : "PARTIALLY_REFUNDED";
 
   const updated = await prisma.deposit.update({
     where: { id: depositId },
     data: {
       refundStatus: status,
-      refundAmount,
+      refundAmount: newTotal,
       refundDate: new Date(),
       refundReason: reason,
     },
