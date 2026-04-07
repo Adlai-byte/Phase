@@ -31,3 +31,6 @@ Thumbs.db
 
 # turbo
 .turbo/
+
+.vercel
+.env*.local
