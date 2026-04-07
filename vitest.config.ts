@@ -8,8 +8,11 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/**/*.test.ts"],
+    globalSetup: ["./vitest.globalSetup.ts"],
     setupFiles: ["src/test/setup.ts"],
     fileParallelism: false,
+    testTimeout: 30000,
+    hookTimeout: 60000,
   },
   resolve: {
     alias: {
