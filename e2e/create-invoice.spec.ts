@@ -4,7 +4,7 @@ test.describe("Create invoice", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/login");
     await page.fill('input[name="email"]', "elena@phase.com");
-    await page.fill('input[name="password"]', "Password1");
+    await page.fill('input[name="password"]', "ElenaPass2026");
     await page.click('button[type="submit"]');
     await page.waitForURL("**/dashboard", { timeout: 10000 });
   });

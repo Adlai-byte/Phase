@@ -81,26 +81,31 @@ async function main() {
   await prisma.subscription.deleteMany();
   await prisma.user.deleteMany();
 
-  const pw = await bcrypt.hash("Password1", 10);
+  // Per-account passwords (each unique so impersonation/auth tests can
+  // verify the right user is being authenticated, not just "any user")
+  const adminPw = await bcrypt.hash("AdminPass2026", 10);
+  const elenaPw = await bcrypt.hash("ElenaPass2026", 10);
+  const robertoPw = await bcrypt.hash("RobertoPass2026", 10);
+  const sofiaPw = await bcrypt.hash("SofiaPass2026", 10);
 
   // ══════════════════════════════════════════════
   // USERS
   // ══════════════════════════════════════════════
 
   const admin = await prisma.user.create({
-    data: { name: "Phase Admin", email: "admin@phase.com", password: pw, role: "SUPERADMIN", verified: true, phone: "0917-000-0000" },
+    data: { name: "Phase Admin", email: "admin@phase.com", password: adminPw, role: "SUPERADMIN", verified: true, phone: "0917-000-0000" },
   });
 
   const elena = await prisma.user.create({
-    data: { name: "Elena Magsaysay", email: "elena@phase.com", password: pw, role: "OWNER", verified: true, phone: "0917-111-2222" },
+    data: { name: "Elena Magsaysay", email: "elena@phase.com", password: elenaPw, role: "OWNER", verified: true, phone: "0917-111-2222" },
   });
 
   const roberto = await prisma.user.create({
-    data: { name: "Roberto Duterte", email: "roberto@phase.com", password: pw, role: "OWNER", verified: true, phone: "0918-333-4444" },
+    data: { name: "Roberto Duterte", email: "roberto@phase.com", password: robertoPw, role: "OWNER", verified: true, phone: "0918-333-4444" },
   });
 
   const sofia = await prisma.user.create({
-    data: { name: "Sofia Ramos", email: "sofia@phase.com", password: pw, role: "OWNER", verified: false, phone: "0919-555-6666" },
+    data: { name: "Sofia Ramos", email: "sofia@phase.com", password: sofiaPw, role: "OWNER", verified: false, phone: "0919-555-6666" },
   });
 
   // ══════════════════════════════════════════════
@@ -545,10 +550,10 @@ async function main() {
   console.log("║           PHASE SEED DATA — VERIFICATION         ║");
   console.log("╠══════════════════════════════════════════════════╣");
   console.log("║ Credentials:                                     ║");
-  console.log("║   Admin:   admin@phase.com / Password1           ║");
-  console.log("║   Elena:   elena@phase.com / Password1           ║");
-  console.log("║   Roberto: roberto@phase.com / Password1         ║");
-  console.log("║   Sofia:   sofia@phase.com / Password1 (pending) ║");
+  console.log("║   Admin:   admin@phase.com   / AdminPass2026     ║");
+  console.log("║   Elena:   elena@phase.com   / ElenaPass2026     ║");
+  console.log("║   Roberto: roberto@phase.com / RobertoPass2026   ║");
+  console.log("║   Sofia:   sofia@phase.com   / SofiaPass2026     ║");
   console.log("╠══════════════════════════════════════════════════╣");
   console.log("║ Platform Totals:                                  ║");
   console.log(`║   Owners: 3 (2 verified, 1 pending)              ║`);

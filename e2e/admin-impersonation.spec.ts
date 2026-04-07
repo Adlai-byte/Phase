@@ -5,7 +5,7 @@ test.describe("Admin impersonation", () => {
     // Login as admin
     await page.goto("/login");
     await page.fill('input[name="email"]', "admin@phase.com");
-    await page.fill('input[name="password"]', "Password1");
+    await page.fill('input[name="password"]', "AdminPass2026");
     await page.click('button[type="submit"]');
     await page.waitForURL("**/admin", { timeout: 10000 });
 

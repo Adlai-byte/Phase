@@ -4,7 +4,7 @@ test.describe("Login flow", () => {
   test("owner can log in and reach dashboard", async ({ page }) => {
     await page.goto("/login");
     await page.fill('input[name="email"]', "elena@phase.com");
-    await page.fill('input[name="password"]', "Password1");
+    await page.fill('input[name="password"]', "ElenaPass2026");
     await page.click('button[type="submit"]');
     await page.waitForURL("**/dashboard", { timeout: 10000 });
     await expect(page).toHaveURL(/\/dashboard/);
@@ -13,7 +13,7 @@ test.describe("Login flow", () => {
   test("invalid credentials show error", async ({ page }) => {
     await page.goto("/login");
     await page.fill('input[name="email"]', "elena@phase.com");
-    await page.fill('input[name="password"]', "WrongPassword1");
+    await page.fill('input[name="password"]', "WrongPass2026");
     await page.click('button[type="submit"]');
     await page.waitForTimeout(2000);
     await expect(
@@ -26,7 +26,7 @@ test.describe("Login flow", () => {
   test("admin can log in and reach admin panel", async ({ page }) => {
     await page.goto("/login");
     await page.fill('input[name="email"]', "admin@phase.com");
-    await page.fill('input[name="password"]', "Password1");
+    await page.fill('input[name="password"]', "AdminPass2026");
     await page.click('button[type="submit"]');
     await page.waitForURL("**/admin", { timeout: 10000 });
     await expect(page).toHaveURL(/\/admin/);
